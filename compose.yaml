@@ -1,0 +1,20 @@
+services: 
+  inventory-db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: inventory-user 
+      POSTGRES_PASSWORD: inventory-pass 
+      POSTGRES_DB: inventory-db
+    ports: 
+      - '5432:5432'
+    volumes:
+      - inventory_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U inventory-user -d inventory-db']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  inventory_db_data:
+
