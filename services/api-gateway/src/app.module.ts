@@ -11,6 +11,11 @@ import { GatewayService } from './gateway.service';
         transport: Transport.TCP,
         options: { host: 'localhost', port: 3001 },
       },
+      {
+        name: 'ORDER_SERVICE',
+        transport: Transport.TCP,
+        options: { host: 'localhost', port: 3002 },
+      },
     ]),
   ],
   controllers: [GatewayController],

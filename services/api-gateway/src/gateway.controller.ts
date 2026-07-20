@@ -12,6 +12,11 @@ export class GatewayController {
 
   @Get("inventory")
   getInventory() {
-    return this.gatewayService.send('inventory.get', {});
+    return this.gatewayService.send("INVENTORY", 'inventory.get', {});
+  }
+
+  @Get("order")
+  getOrder(){
+    return this.gatewayService.send("ORDERS", 'order.get', {})
   }
 }

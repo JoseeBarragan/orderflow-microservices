@@ -1,14 +1,24 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
-import { lastValueFrom } from 'rxjs';
+import { Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { ClientProxy } from "@nestjs/microservices";
+import { lastValueFrom } from "rxjs";
 
 @Injectable()
 export class GatewayService {
-  constructor(
-    @Inject('INVENTORY_SERVICE') private inventoryClient: ClientProxy,
-  ) {}
+  private clients: Map<string, ClientProxy>;
 
-  async send(pattern: string, payload: any) {
-    return lastValueFrom(this.inventoryClient.send(pattern, payload));
+  constructor(
+    @Inject("INVENTORY_SERVICE") private inventoryClient: ClientProxy,
+    @Inject("ORDER_SERVICE") private ordersClient: ClientProxy,
+  ) {
+    this.clients = new Map([
+      ["INVENTORY", inventoryClient],
+      ["ORDERS", ordersClient],
+    ]);
+  }
+
+  async send(service: 'INVENTORY' | 'ORDERS' | 'PAYMENT', pattern: string, payload: any) {
+    const client = this.clients.get(service);
+    if (!client) throw new NotFoundException("Servicio no encontrado")
+    return lastValueFrom(client.send(pattern, payload));
   }
 }
