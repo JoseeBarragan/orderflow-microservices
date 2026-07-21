@@ -1,9 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { PgService } from "./Pg.service";
-import { Product } from "./products.types";
+import { Product } from "./Inventory.types";
 
 @Injectable()
-export class ProductsRepository {
+export class InventoryRepository {
   constructor(private readonly pg: PgService) {}
 
   async findAll(limit = 50, offset = 0): Promise<Product[]> {

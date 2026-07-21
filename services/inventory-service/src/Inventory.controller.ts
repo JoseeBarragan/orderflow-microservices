@@ -1,11 +1,11 @@
 import { Controller } from "@nestjs/common";
 import { MessagePattern } from "@nestjs/microservices";
-import { AppService } from "./app.service";
-import type { ListProductsQuery } from "./products.types";
+import { InventoryService } from "./Inventory.service";
+import type { ListProductsQuery } from "./Inventory.types";
 
 @Controller()
-export class AppController {
-  constructor(private readonly appService: AppService) {}
+export class InventoryController {
+  constructor(private readonly appService: InventoryService) {}
 
   @MessagePattern("inventory.get")
   getProducts(payload: ListProductsQuery) {
