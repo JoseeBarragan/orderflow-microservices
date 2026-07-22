@@ -1,4 +1,13 @@
-type OrderItems = { productId: string; quantity: number; unitaryPrice: number };
+export type OrderItems = {
+  productId: string;
+  quantity: number;
+  unitPrice: number;
+};
+
+export type OrderItemsWithOutId = {
+  quantity: number;
+  unitPrice: number;
+};
 
 export enum OrderStatus {
   PENDING = "PENDING",
@@ -21,7 +30,7 @@ export class Order {
     }
 
     const total = items.reduce(
-      (accum, item) => accum + item.unitaryPrice * item.quantity,
+      (accum, item) => accum + item.unitPrice * item.quantity,
       0,
     );
 

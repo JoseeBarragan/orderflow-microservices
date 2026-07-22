@@ -1,1 +1,17 @@
-GET http://localhost:3000/order
+DELETE http://localhost:3000/order/551cc0da-dfd7-4c39-a5b9-296573d45fc3
+
+###
+
+POST http://localhost:3000/order
+content-type: application/json
+
+{
+  "items": [
+    {
+      "productid": "ajbsdfjklahbsfkjhabsfkj",
+      "quantity": 2,
+      "unitprice": 1500
+    }
+  ]
+}
+

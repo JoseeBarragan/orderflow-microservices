@@ -1,5 +1,6 @@
-import { Controller, Get } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { GatewayService } from './gateway.service';
+import type { CreateOrderDto } from './dto/order.dto';
 
 @Controller()
 export class GatewayController {
@@ -10,8 +11,8 @@ export class GatewayController {
     return this.gatewayService.send("INVENTORY", 'inventory.get', {});
   }
 
-  @Get("order")
-  getOrder(){
-    return this.gatewayService.send("ORDERS", 'order.get', {})
+  @Post("order")
+  createOrder(@Body() items: CreateOrderDto){
+    return this.gatewayService.send("ORDERS", 'order.create', items)
   }
 }
