@@ -1,12 +1,12 @@
 import { Injectable } from "@nestjs/common";
-import { OrderRepository } from "./order.repository";
-import { OrderItems } from "./order.entity";
+import { OrderItems } from "src/order.entity";
+import { OrderRepository } from "src/order.repository";
 
 @Injectable()
-export class OrderService {
+export class CreateOrderService {
   constructor(private readonly orderRepository: OrderRepository) {}
 
-  async CreateOrder(items: OrderItems[]) {
+  async execute(items: OrderItems[]) {
     const total = items.reduce(
       (accum, item) => accum + item.unitPrice * item.quantity,
       0,

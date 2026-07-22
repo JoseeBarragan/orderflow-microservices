@@ -6,6 +6,16 @@ import { OrderItems } from "./order.entity";
 export class OrderRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  async getAll() {
+    try {
+      return await this.prisma.order.findMany();
+    } catch (err) {
+      throw new ServiceUnavailableException(
+        `Ocurrio un error en el servicio de Prisma ${err}`,
+      );
+    }
+  }
+
   async create(total: number, newItems: OrderItems[]) {
     try {
       return await this.prisma.$transaction(async (tx) => {

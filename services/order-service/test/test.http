@@ -8,10 +8,14 @@ content-type: application/json
 {
   "items": [
     {
-      "productid": "ajbsdfjklahbsfkjhabsfkj",
+      "productId": "ajbsdfjklahbsfkjhabsfkj",
       "quantity": 2,
-      "unitprice": 1500
+      "unitPrice": 1500
     }
   ]
 }
+
+###
+
+GET http://localhost:3000/order
 
