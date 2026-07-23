@@ -16,9 +16,19 @@ export class GatewayService {
     ]);
   }
 
-  async send(service: 'INVENTORY' | 'ORDERS' | 'PAYMENT', pattern: string, payload: any) {
+  async send(
+    service: "INVENTORY" | "ORDERS" | "PAYMENT",
+    pattern: string,
+    payload: any,
+  ) {
     const client = this.clients.get(service);
-    if (!client) throw new NotFoundException("Servicio no encontrado")
-    return lastValueFrom(client.send(pattern, payload));
+    if (!client) throw new NotFoundException("Servicio no encontrado");
+
+    try {
+      return await lastValueFrom(client.send(pattern, payload));
+    } catch (err) {
+      console.error("Error real del microservicio:", err); // acá vas a ver el detalle
+      throw err;
+    }
   }
 }

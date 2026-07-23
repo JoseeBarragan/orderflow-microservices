@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { GatewayService } from './gateway.service';
 import type { CreateOrderDto } from './dto/order.dto';
 
@@ -19,10 +19,5 @@ export class GatewayController {
   @Get("order")
   getAllOrders(){
     return this.gatewayService.send("ORDERS", "order.getAll", {})
-  }
-
-  @Delete("order/:id")
-  deleteOrder(@Param() id: string ) {
-    return this.gatewayService.send("ORDERS", "order.delete", id)
   }
 }

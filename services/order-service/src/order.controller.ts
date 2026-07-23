@@ -13,7 +13,6 @@ export class OrderController {
 
   @MessagePattern("order.create")
   async createOrder(@Payload() payload: { items: OrderItems[] }) {
-    console.log("LLEGO EL MENSAJE", payload);
     return this.createOrderService.execute(payload.items);
   }
 
