@@ -6,6 +6,7 @@ import { ConfigModule } from "@nestjs/config";
 import { CreateOrderService } from "./services/CreateOrder.service";
 import { GetAllOrdersService } from "./services/GetAllOrders.service";
 import { RabbitMQConnection } from "./messaging/rabbitmq/rabbitmq.connection";
+import { OutboxPublisher } from "./messaging/outbox/outbox.publisher";
 
 @Module({
   imports: [ConfigModule.forRoot({ isGlobal: true })],
@@ -15,6 +16,7 @@ import { RabbitMQConnection } from "./messaging/rabbitmq/rabbitmq.connection";
     PrismaService,
     OrderRepository,
     GetAllOrdersService,
+    OutboxPublisher,
     RabbitMQConnection,
   ],
 })

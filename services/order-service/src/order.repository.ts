@@ -48,4 +48,31 @@ export class OrderRepository {
       );
     }
   }
+
+  async getPendingMessage() {
+    try {
+      return await this.prisma.outboxEvent.findMany({
+        where: { published: false },
+        orderBy: { createdAt: "asc" },
+        take: 20,
+      });
+    } catch (err) {
+      throw new ServiceUnavailableException(
+        `Ocurrio un error en el servicio de Prisma ${err}`,
+      );
+    }
+  }
+
+  async updateMessagePublish(id: string, Published: boolean) {
+    try {
+      return await this.prisma.outboxEvent.update({
+        where: { id: id },
+        data: { published: Published, publishedAt: new Date() },
+      });
+    } catch (err) {
+      throw new ServiceUnavailableException(
+        `Ocurrio un error en el servicio de Prisma ${err}`,
+      );
+    }
+  }
 }
