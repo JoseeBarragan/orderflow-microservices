@@ -5,11 +5,27 @@ import { OrderRepository } from "./order.repository";
 import { ConfigModule } from "@nestjs/config";
 import { CreateOrderService } from "./services/CreateOrder.service";
 import { GetAllOrdersService } from "./services/GetAllOrders.service";
-import { RabbitMQConnection } from "./messaging/rabbitmq/rabbitmq.connection";
 import { OutboxPublisher } from "./messaging/outbox/outbox.publisher";
+import { ClientsModule, Transport } from "@nestjs/microservices";
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true })],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    ClientsModule.register([
+      {
+        name: "RMQ_CLIENT",
+        transport: Transport.RMQ,
+        options: {
+          urls: ["amqp://localhost:5672"],
+          exchange: "orderflow.events",
+          exchangeType: "topic",
+          routingKey: "order.created",
+          queue: "order-service.publisher.queue",
+          queueOptions: { durable: true },
+        },
+      },
+    ]),
+  ],
   controllers: [OrderController],
   providers: [
     CreateOrderService,
@@ -17,7 +33,6 @@ import { OutboxPublisher } from "./messaging/outbox/outbox.publisher";
     OrderRepository,
     GetAllOrdersService,
     OutboxPublisher,
-    RabbitMQConnection,
   ],
 })
 export class OrderModule {}

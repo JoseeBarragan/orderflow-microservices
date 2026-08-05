@@ -3,7 +3,7 @@ DELETE http://localhost:3000/order/551cc0da-dfd7-4c39-a5b9-296573d45fc3
 ###
 
 POST http://localhost:3000/order
-content-type: application/json
+Content-Type: application/json
 
 {
   "items": [
