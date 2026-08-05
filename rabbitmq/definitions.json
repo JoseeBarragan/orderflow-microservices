@@ -1,0 +1,19 @@
+{
+  "exchanges": [
+    {
+      "name": "orderflow.events",
+      "vhost": "/",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false
+    }
+  ],
+  "queues": [
+    {
+      "name": "order-service.publisher.queue",
+      "vhost": "/",
+      "durable": true
+    }
+  ],
+  "bindings": []
+}
