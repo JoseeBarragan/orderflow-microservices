@@ -1,5 +1,5 @@
 import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
-import { OrderRepository } from "../../order.repository";
+import { OrderRepository } from "../order.repository";
 import { ClientProxy } from "@nestjs/microservices";
 
 const ROUTING_KEYS: Record<string, string> = {

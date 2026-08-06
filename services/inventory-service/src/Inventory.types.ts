@@ -13,5 +13,5 @@ export interface ListProductsQuery {
 }
 
 export interface NewOrder {
-  items: [productId: string, quantity: number, unitPrice: number];
+  items: { productId: string; quantity: number; unitPrice: number }[];
 }

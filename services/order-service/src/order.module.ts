@@ -5,7 +5,7 @@ import { OrderRepository } from "./order.repository";
 import { ConfigModule } from "@nestjs/config";
 import { CreateOrderService } from "./services/CreateOrder.service";
 import { GetAllOrdersService } from "./services/GetAllOrders.service";
-import { OutboxPublisher } from "./messaging/outbox/outbox.publisher";
+import { OutboxPublisher } from "./messaging/outbox.publisher";
 import { ClientsModule, Transport } from "@nestjs/microservices";
 
 @Module({
