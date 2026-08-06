@@ -1,20 +1,26 @@
 import { Controller } from "@nestjs/common";
-import { EventPattern, MessagePattern } from "@nestjs/microservices";
-import type { ListProductsQuery } from "./Inventory.types";
-import { InventoryService } from "./services/Inventory.service";
+import { EventPattern, MessagePattern, Payload } from "@nestjs/microservices";
+import type { ListProductsQuery, NewOrder } from "./Inventory.types";
+import { GetAllProductsService } from "./services/GetAllProducts.service";
+import { ReserveStockService } from "./services/ReserveStock.service";
 
 @Controller()
 export class InventoryController {
-  constructor(private readonly appService: InventoryService) {}
+  constructor(
+    private readonly getAllProductsService: GetAllProductsService,
+    private readonly reserveStockService: ReserveStockService,
+  ) {}
 
   @MessagePattern("inventory.get")
   async getProducts(payload: ListProductsQuery) {
-    return await this.appService.getProducts(payload?.limit, payload?.offset);
+    return await this.getAllProductsService.getProducts(
+      payload?.limit,
+      payload?.offset,
+    );
   }
 
   @EventPattern("order.created")
-  reserveStock(payload) {
-    console.log("The event happen", payload);
-    return;
+  async reserveStock(@Payload() payload: NewOrder) {
+    return await this.reserveStockService.execute(payload);
   }
 }

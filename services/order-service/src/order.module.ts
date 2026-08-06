@@ -23,6 +23,7 @@ import { ClientsModule, Transport } from "@nestjs/microservices";
           queue: "order-service.publisher.queue",
           queueOptions: { durable: true },
           persistent: true,
+          wildcards: true,
         },
       },
     ]),

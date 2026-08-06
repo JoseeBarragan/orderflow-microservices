@@ -1,10 +1,11 @@
 import { Module } from "@nestjs/common";
 import { InventoryController } from "./Inventory.controller";
-import { PgService } from "./Pg.service";
 import { InventoryRepository } from "./Inventory.repository";
 import { ConfigModule } from "@nestjs/config";
-import { InventoryService } from "./services/Inventory.service";
 import { ClientsModule, Transport } from "@nestjs/microservices";
+import { GetAllProductsService } from "./services/GetAllProducts.service";
+import { ReserveStockService } from "./services/ReserveStock.service";
+import { PrismaService } from "./prisma.service";
 
 @Module({
   imports: [
@@ -25,6 +26,11 @@ import { ClientsModule, Transport } from "@nestjs/microservices";
     ]),
   ],
   controllers: [InventoryController],
-  providers: [InventoryService, PgService, InventoryRepository],
+  providers: [
+    GetAllProductsService,
+    PrismaService,
+    InventoryRepository,
+    ReserveStockService,
+  ],
 })
 export class InventoryModule {}

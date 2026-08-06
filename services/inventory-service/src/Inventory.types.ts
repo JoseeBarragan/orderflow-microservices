@@ -11,3 +11,7 @@ export interface ListProductsQuery {
   limit?: number;
   offset?: number;
 }
+
+export interface NewOrder {
+  items: [productId: string, quantity: number, unitPrice: number];
+}
