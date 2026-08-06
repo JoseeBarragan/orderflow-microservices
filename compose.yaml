@@ -4,9 +4,6 @@ services:
     ports:
       - '5672:5672'   
       - '15672:15672'  
-    volumes:
-      - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
-      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
     healthcheck:
       test: ['CMD', 'rabbitmq-diagnostics', 'ping']
       interval: 5s

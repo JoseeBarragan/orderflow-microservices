@@ -22,6 +22,7 @@ import { ClientsModule, Transport } from "@nestjs/microservices";
           routingKey: "order.created",
           queue: "order-service.publisher.queue",
           queueOptions: { durable: true },
+          persistent: true,
         },
       },
     ]),
