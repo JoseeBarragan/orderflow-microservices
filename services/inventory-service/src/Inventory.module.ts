@@ -6,6 +6,7 @@ import { ClientsModule, Transport } from "@nestjs/microservices";
 import { GetAllProductsService } from "./services/GetAllProducts.service";
 import { ReserveStockService } from "./services/ReserveStock.service";
 import { PrismaService } from "./prisma.service";
+import { OutboxPublisher } from "./messaging/outbox.publisher";
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { PrismaService } from "./prisma.service";
           urls: ["amqp://localhost:5672"],
           queue: "inventory-service.publisher.queue",
           queueOptions: { durable: true },
+          routingKey: "stock.reserve",
           exchange: "orderflow.events",
           exchangeType: "topic",
           persistent: true,
@@ -31,6 +33,7 @@ import { PrismaService } from "./prisma.service";
     PrismaService,
     InventoryRepository,
     ReserveStockService,
+    OutboxPublisher,
   ],
 })
 export class InventoryModule {}

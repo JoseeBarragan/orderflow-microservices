@@ -18,6 +18,7 @@ export class ReserveStockService {
       this.rabbitmq.emit("stock.rejected", "Invalid product on the order");
       return;
     }
+    await this.inventoryRepository.reserveStock(payload);
     return;
   }
 }
