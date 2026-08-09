@@ -3,8 +3,9 @@ import {
   InternalServerErrorException,
   Logger,
 } from "@nestjs/common";
-import { NewOrder, Product } from "./Inventory.types";
-import { PrismaService } from "./prisma.service";
+import { PrismaService } from "../prisma.service";
+import { NewOrder, Product } from "../types/Inventory.types";
+import { StockUnavailableError } from "../types/Error.types";
 
 @Injectable()
 export class InventoryRepository {
@@ -36,9 +37,27 @@ export class InventoryRepository {
     }
   }
 
-  async reserveStock(order: NewOrder) {
+  async reserveStock(
+    order: NewOrder,
+  ): Promise<{ success: true } | { success: false; reason: string }> {
     try {
       await this.prisma.$transaction(async (tx) => {
+        for (const item of order.items) {
+          const result = await tx.products.updateMany({
+            where: {
+              id: item.productId,
+              available_stock: { gte: item.quantity },
+            },
+            data: {
+              available_stock: { decrement: item.quantity },
+              reserved_stock: { increment: item.quantity },
+            },
+          });
+
+          if (result.count === 0)
+            throw new StockUnavailableError(item.productId);
+        }
+
         await tx.stock_reservations.createMany({
           data: order.items.map((i) => ({
             order_id: order.orderId,
@@ -58,37 +77,13 @@ export class InventoryRepository {
           },
         });
       });
-      return;
+      return { success: true };
     } catch (err) {
+      if (err instanceof StockUnavailableError) {
+        return { success: false, reason: err.message };
+      }
       this.logger.error(`Error al guardar el stock ${err}`);
       throw new InternalServerErrorException("Error en el servidor, ", err);
-    }
-  }
-
-  async getPendingMessage() {
-    try {
-      return await this.prisma.outbox_events.findMany({
-        where: { published: false },
-        orderBy: { created_at: "asc" },
-        take: 20,
-      });
-    } catch (err) {
-      throw new InternalServerErrorException(
-        `Ocurrio un error en el servicio de Prisma ${err}`,
-      );
-    }
-  }
-
-  async updateMessagePublish(id: string, Published: boolean) {
-    try {
-      return await this.prisma.outbox_events.update({
-        where: { id: id },
-        data: { published: Published, published_at: new Date() },
-      });
-    } catch (err) {
-      throw new InternalServerErrorException(
-        `Ocurrio un error en el servicio de Prisma ${err}`,
-      );
     }
   }
 }

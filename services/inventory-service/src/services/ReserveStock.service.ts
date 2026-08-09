@@ -1,13 +1,13 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { InventoryRepository } from "../Inventory.repository";
-import { NewOrder } from "../Inventory.types";
-import { ClientProxy } from "@nestjs/microservices";
+import { Injectable } from "@nestjs/common";
+import { InventoryRepository } from "../Repository/Inventory.repository";
+import { OutboxRepository } from "../Repository/Outbox.repository";
+import { NewOrder } from "../types/Inventory.types";
 
 @Injectable()
 export class ReserveStockService {
   constructor(
+    private readonly outboxRepository: OutboxRepository,
     private readonly inventoryRepository: InventoryRepository,
-    @Inject("RMQ_CLIENT") private readonly rabbitmq: ClientProxy,
   ) {}
 
   async execute(payload: NewOrder) {
@@ -15,10 +15,28 @@ export class ReserveStockService {
     const products = await this.inventoryRepository.findByIds(ids);
 
     if (products.length !== ids.length) {
-      this.rabbitmq.emit("stock.rejected", "Invalid product on the order");
+      await this.outboxRepository.save("stock.reject", {
+        orderId: payload.orderId,
+        reason: "PRODUCT_NOT_FOUND",
+      });
       return;
     }
-    await this.inventoryRepository.reserveStock(payload);
+
+    const result = await this.inventoryRepository.reserveStock(payload);
+
+    if (!result.success) {
+      await this.outboxRepository.save("stock.reject", {
+        orderId: payload.orderId,
+        reason: result?.reason,
+      });
+      return;
+    }
+
+    await this.outboxRepository.save("stock.reserve", {
+      orderId: payload.orderId,
+      items: payload.items,
+      totalAmount: payload.totalAmount,
+    });
     return;
   }
 }
