@@ -19,7 +19,6 @@ import { ClientsModule, Transport } from "@nestjs/microservices";
           urls: ["amqp://localhost:5672"],
           exchange: "orderflow.events",
           exchangeType: "topic",
-          routingKey: "order.created",
           queue: "order-service.publisher.queue",
           queueOptions: { durable: true },
           persistent: true,

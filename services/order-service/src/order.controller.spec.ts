@@ -2,7 +2,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { OrderController } from "./order.controller";
 import { CreateOrderService } from "./services/CreateOrder.service";
 import { GetAllOrdersService } from "./services/GetAllOrders.service";
-import { OrderItems } from "./order.entity";
+import { OrderItems } from "./types/order.entity";
 
 describe("OrderController", () => {
   let controller: OrderController;

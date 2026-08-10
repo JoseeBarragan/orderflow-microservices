@@ -1,6 +1,6 @@
 import { Injectable, ServiceUnavailableException } from "@nestjs/common";
 import { PrismaService } from "./prisma.service";
-import { OrderItems } from "./order.entity";
+import { OrderItems } from "./types/order.entity";
 
 @Injectable()
 export class OrderRepository {
@@ -41,6 +41,21 @@ export class OrderRepository {
         });
 
         return order;
+      });
+    } catch (err) {
+      throw new ServiceUnavailableException(
+        `Ocurrio un error en el servicio de Prisma ${err}`,
+      );
+    }
+  }
+
+  async cancelOrder(orderId: string) {
+    try {
+      return await this.prisma.order.update({
+        where: { id: orderId },
+        data: {
+          status: "CANCELLED",
+        },
       });
     } catch (err) {
       throw new ServiceUnavailableException(

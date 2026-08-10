@@ -17,3 +17,9 @@ export enum OrderStatus {
 }
 
 export type OutboxEventType = "order.created";
+
+export interface NewOrder {
+  orderId: string;
+  totalAmount: number;
+  items: { productId: string; quantity: number; unitPrice: number }[];
+}
