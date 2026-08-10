@@ -31,7 +31,7 @@ export class OrderRepository {
 
         await tx.outboxEvent.create({
           data: {
-            eventType: "OrderCreated",
+            eventType: "order.created",
             payload: {
               orderId: order.id,
               items: newItems,

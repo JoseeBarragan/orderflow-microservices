@@ -6,6 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
+    "db:clean": "psql \"postgresql://inventory-user:inventory-pass@localhost:5432/inventory-db\" -f sql/clean.sql",
     "build": "nest build",
     "seed": "sh -c 'set -a; . ./.env; set +a; psql \"$DATABASE_URL\" -f sql/seed-products.sql'",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",

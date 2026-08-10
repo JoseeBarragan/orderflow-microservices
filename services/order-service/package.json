@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "db:clean": "psql \"postgresql://orders_user:orders_pass@localhost:5432/orders_db\" -f sql/clean.sql",
+    "db:clean": "psql \"postgresql://orders_user:orders_pass@localhost:5433/orders_db\" -f sql/clean.sql",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",

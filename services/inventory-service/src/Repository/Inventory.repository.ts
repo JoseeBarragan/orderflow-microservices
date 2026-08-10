@@ -68,7 +68,7 @@ export class InventoryRepository {
 
         await tx.outbox_events.create({
           data: {
-            event_type: "StockReserve",
+            event_type: "stock.reserve",
             payload: {
               orderId: order.orderId,
               items: order.items,

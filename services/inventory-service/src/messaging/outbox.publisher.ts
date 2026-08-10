@@ -36,6 +36,6 @@ export class OutboxPublisher implements OnModuleInit {
   }
 
   private isOutboxEventType(value: string): value is OutboxEventType {
-    return value === "StockReserved" || value === "StockRejected";
+    return value === "stock.reserve" || value === "stock.reject";
   }
 }

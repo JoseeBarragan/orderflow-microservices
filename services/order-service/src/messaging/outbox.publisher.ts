@@ -1,10 +1,7 @@
 import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
 import { OrderRepository } from "../order.repository";
 import { ClientProxy } from "@nestjs/microservices";
-
-const ROUTING_KEYS: Record<string, string> = {
-  OrderCreated: "order.created",
-};
+import { OutboxEventType } from "../order.entity";
 
 @Injectable()
 export class OutboxPublisher implements OnModuleInit {
@@ -25,15 +22,21 @@ export class OutboxPublisher implements OnModuleInit {
     if (messages.length === 0) return;
 
     for (const msg of messages) {
-      const routingKey = ROUTING_KEYS[msg.eventType];
-      if (!routingKey) continue;
+      if (!this.isOutboxEventType(msg.eventType)) {
+        console.error(`Tipo de evento desconocido: ${msg.eventType}`);
+        continue;
+      }
 
       try {
-        this.client.emit(routingKey, msg.payload);
+        this.client.emit(msg.eventType, msg.payload);
         await this.orderRepository.updateMessagePublish(msg.id, true);
       } catch (err) {
         console.error(`Error publicando mensaje ${msg.id}: ${err}`);
       }
     }
+  }
+
+  private isOutboxEventType(value: string): value is OutboxEventType {
+    return value === "order.created";
   }
 }
