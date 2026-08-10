@@ -2,7 +2,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { InventoryController } from "./Inventory.controller";
 import { GetAllProductsService } from "./services/GetAllProducts.service";
 import { ReserveStockService } from "./services/ReserveStock.service";
-import { NewOrder } from "./Inventory.types";
+import { NewOrder } from "./types/Inventory.types";
 
 describe("InventoryController", () => {
   let controller: InventoryController;
@@ -87,6 +87,8 @@ describe("InventoryController", () => {
   describe("order.created", () => {
     it("delega la reserva de stock al ReserveStockService con el payload", async () => {
       const order: NewOrder = {
+        orderId: "3278373d-174f-467a-aaa5-82fc9957a6bf",
+        totalAmount: 3000,
         items: [
           {
             productId: "3278373d-174f-467a-aaa5-82fc9957a6bf",
@@ -108,9 +110,9 @@ describe("InventoryController", () => {
       const error = new Error("stock error");
       reserveStockService.execute.mockRejectedValue(error);
 
-      await expect(controller.reserveStock({ items: [] })).rejects.toThrow(
-        error,
-      );
+      await expect(
+        controller.reserveStock({ orderId: "o1", totalAmount: 0, items: [] }),
+      ).rejects.toThrow(error);
     });
   });
 });

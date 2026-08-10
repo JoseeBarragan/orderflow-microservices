@@ -52,11 +52,11 @@ export class OutboxRepository {
     }
   }
 
-  async updateMessagePublish(id: string, Published: boolean) {
+  async updateMessagePublish(id: string, published: boolean) {
     try {
       return await this.prisma.outbox_events.update({
         where: { id: id },
-        data: { published: Published, published_at: new Date() },
+        data: { published: published, published_at: new Date() },
       });
     } catch (err) {
       this.logger.error(err);

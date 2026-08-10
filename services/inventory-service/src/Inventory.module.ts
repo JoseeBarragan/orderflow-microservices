@@ -1,12 +1,13 @@
 import { Module } from "@nestjs/common";
 import { InventoryController } from "./Inventory.controller";
-import { InventoryRepository } from "./Inventory.repository";
 import { ConfigModule } from "@nestjs/config";
 import { ClientsModule, Transport } from "@nestjs/microservices";
 import { GetAllProductsService } from "./services/GetAllProducts.service";
 import { ReserveStockService } from "./services/ReserveStock.service";
 import { PrismaService } from "./prisma.service";
 import { OutboxPublisher } from "./messaging/outbox.publisher";
+import { InventoryRepository } from "./Repository/Inventory.repository";
+import { OutboxRepository } from "./Repository/Outbox.repository";
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { OutboxPublisher } from "./messaging/outbox.publisher";
     GetAllProductsService,
     PrismaService,
     InventoryRepository,
+    OutboxRepository,
     ReserveStockService,
     OutboxPublisher,
   ],

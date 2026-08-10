@@ -1,7 +1,7 @@
 import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
 import { ClientProxy } from "@nestjs/microservices";
-import { OutboxRepository } from "src/Repository/Outbox.repository";
-import { OutboxEventType } from "src/types/Inventory.types";
+import { OutboxRepository } from "../Repository/Outbox.repository";
+import { OutboxEventType } from "../types/Inventory.types";
 
 @Injectable()
 export class OutboxPublisher implements OnModuleInit {

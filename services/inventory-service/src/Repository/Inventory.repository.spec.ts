@@ -1,7 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { InternalServerErrorException, Logger } from "@nestjs/common";
 import { InventoryRepository } from "./Inventory.repository";
-import { PrismaService } from "./prisma.service";
+import { PrismaService } from "../prisma.service";
 
 describe("InventoryRepository", () => {
   let repository: InventoryRepository;

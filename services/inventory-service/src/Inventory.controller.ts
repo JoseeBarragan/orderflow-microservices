@@ -1,8 +1,12 @@
 import { Controller } from "@nestjs/common";
 import { EventPattern, MessagePattern, Payload } from "@nestjs/microservices";
-import type { ListProductsQuery, NewOrder } from "./Inventory.types";
 import { GetAllProductsService } from "./services/GetAllProducts.service";
 import { ReserveStockService } from "./services/ReserveStock.service";
+import type {
+  ListProductsQuery,
+  NewOrder,
+  Product,
+} from "./types/Inventory.types";
 
 @Controller()
 export class InventoryController {
@@ -12,7 +16,7 @@ export class InventoryController {
   ) {}
 
   @MessagePattern("inventory.get")
-  async getProducts(payload: ListProductsQuery) {
+  async getProducts(payload: ListProductsQuery): Promise<Product[]> {
     return await this.getAllProductsService.getProducts(
       payload?.limit,
       payload?.offset,
