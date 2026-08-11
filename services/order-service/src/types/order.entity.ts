@@ -9,14 +9,9 @@ export type OrderItemsWithOutId = {
   unitPrice: number;
 };
 
-export enum OrderStatus {
-  PENDING = "PENDING",
-  CONFIRMED = "CONFIRMED",
-  CANCELLED = "CANCELLED",
-  COMPLETED = "COMPLETED",
-}
+export type OrderStatus = "PENDING" | "CONFIRMED" | "CANCELLED";
 
-export type OutboxEventType = "order.created";
+export type OutboxEventType = "worder.createdw";
 
 export interface NewOrder {
   orderId: string;
