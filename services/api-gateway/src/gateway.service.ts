@@ -1,6 +1,19 @@
-import { Inject, Injectable, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  ConflictException,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from "@nestjs/common";
 import { ClientProxy } from "@nestjs/microservices";
 import { lastValueFrom } from "rxjs";
+
+const EXCEPTION_MAP: Record<number, new (msg: string) => any> = {
+  404: NotFoundException,
+  400: BadRequestException,
+  409: ConflictException,
+};
 
 @Injectable()
 export class GatewayService {
@@ -27,8 +40,11 @@ export class GatewayService {
     try {
       return await lastValueFrom(client.send(pattern, payload));
     } catch (err) {
-      console.error("Error real del microservicio:", err); // acá vas a ver el detalle
-      throw err;
+      console.error("Error real del microservicio:", err);
+
+      const ExceptionClass =
+        EXCEPTION_MAP[err?.status] ?? InternalServerErrorException;
+      throw new ExceptionClass(err?.message ?? "Error inesperado");
     }
   }
 }

@@ -4,23 +4,30 @@ import { CreateOrderService } from "./services/CreateOrder.service";
 import { GetAllOrdersService } from "./services/GetAllOrders.service";
 import { NewOrder, OrderItems } from "./types/order.entity";
 import { CancelOrderService } from "./services/CancelOrder.service";
+import { GetByIdService } from "./services/GetById.service";
 
-@Controller()
+@Controller("order")
 export class OrderController {
   constructor(
     private readonly createOrderService: CreateOrderService,
     private readonly getAllOrdersService: GetAllOrdersService,
     private readonly cancelOrderService: CancelOrderService,
+    private readonly getByIdService: GetByIdService,
   ) {}
+
+  @MessagePattern("order.getById")
+  async getOrder(@Payload() payload: string) {
+    return await this.getByIdService.execute(payload);
+  }
 
   @MessagePattern("order.create")
   async createOrder(@Payload() payload: { items: OrderItems[] }) {
-    return this.createOrderService.execute(payload.items);
+    return await this.createOrderService.execute(payload.items);
   }
 
   @MessagePattern("order.getAll")
   async getAllOrders() {
-    return this.getAllOrdersService.execute();
+    return await this.getAllOrdersService.execute();
   }
 
   @EventPattern("stock.*")

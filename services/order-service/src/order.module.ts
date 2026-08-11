@@ -7,6 +7,8 @@ import { CreateOrderService } from "./services/CreateOrder.service";
 import { GetAllOrdersService } from "./services/GetAllOrders.service";
 import { OutboxPublisher } from "./messaging/outbox.publisher";
 import { ClientsModule, Transport } from "@nestjs/microservices";
+import { CancelOrderService } from "./services/CancelOrder.service";
+import { GetByIdService } from "./services/GetById.service";
 
 @Module({
   imports: [
@@ -34,6 +36,8 @@ import { ClientsModule, Transport } from "@nestjs/microservices";
     OrderRepository,
     GetAllOrdersService,
     OutboxPublisher,
+    CancelOrderService,
+    GetByIdService,
   ],
 })
 export class OrderModule {}
