@@ -5,6 +5,7 @@ import { PaymentRepository } from "./Repository/payment.repository";
 import { ConfirmPaymentService } from "./services/ConfirmPayment.service";
 import { ConfigModule } from "@nestjs/config";
 import { CreatePaymentService } from "./services/CreatePayment.service";
+import { ExceptionFilter } from "./services/rpc-exception.filter";
 
 @Module({
   imports: [ConfigModule.forRoot({ isGlobal: true })],
@@ -13,6 +14,7 @@ import { CreatePaymentService } from "./services/CreatePayment.service";
     PrismaService,
     PaymentRepository,
     ConfirmPaymentService,
+    ExceptionFilter,
     CreatePaymentService,
   ],
 })

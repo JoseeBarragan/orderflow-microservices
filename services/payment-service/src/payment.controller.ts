@@ -1,9 +1,11 @@
-import { Controller } from "@nestjs/common";
+import { Controller, UseFilters } from "@nestjs/common";
 import { EventPattern, GrpcMethod, Payload } from "@nestjs/microservices";
 import { ConfirmPaymentService } from "./services/ConfirmPayment.service";
 import type { StockReservedPayload } from "./types/payment.types";
 import { CreatePaymentService } from "./services/CreatePayment.service";
+import { ExceptionFilter } from "./services/rpc-exception.filter";
 
+@UseFilters(new ExceptionFilter())
 @Controller()
 export class PaymentController {
   constructor(
@@ -13,7 +15,6 @@ export class PaymentController {
 
   @GrpcMethod("PaymentService")
   async confirmPayment(data: { orderId: string }) {
-    console.log(data);
     return await this.confirmPaymentService.execute(data.orderId);
   }
 
