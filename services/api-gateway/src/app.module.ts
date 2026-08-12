@@ -1,7 +1,11 @@
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { GatewayController } from './gateway.controller';
-import { GatewayService } from './gateway.service';
+import { GatewayService } from './services/gateway.service';
+import { join } from "path";
+import { PaymentGatewayService } from './services/paymentClient.service';
+
+const protoPath = join(__dirname, "proto/payment.proto");
 
 @Module({
   imports: [
@@ -16,9 +20,21 @@ import { GatewayService } from './gateway.service';
         transport: Transport.TCP,
         options: { host: 'localhost', port: 3002 },
       },
+      {
+        name: "PAYMENT_PACKAGE",
+        transport: Transport.GRPC,
+        options: {
+          package: "payment",
+          protoPath: protoPath,
+          url: "localhost:5005"
+        }
+      }
     ]),
   ],
   controllers: [GatewayController],
-  providers: [GatewayService],
+  providers: [
+    GatewayService,
+    PaymentGatewayService,
+  ],
 })
 export class AppModule {}

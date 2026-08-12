@@ -1,12 +1,12 @@
-import { Controller, Get } from '@nestjs/common';
-import { AppService } from './app.service';
+import { Controller } from "@nestjs/common";
+import { GrpcMethod } from "@nestjs/microservices";
 
 @Controller()
 export class PaymentController {
-  constructor(private readonly appService: AppService) {}
+  constructor() {}
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  @GrpcMethod("PaymentService")
+  confirmPayment() {
+    return { status: "Hello" };
   }
 }
