@@ -38,7 +38,7 @@ export class GatewayService {
     if (!client) throw new NotFoundException("Servicio no encontrado");
 
     try {
-      return await lastValueFrom(client.send(pattern, payload));
+      return lastValueFrom(client.send(pattern, payload));
     } catch (err) {
       console.error("Error real del microservicio:", err);
 

@@ -3,17 +3,18 @@ import type { ClientGrpc } from "@nestjs/microservices";
 import { Observable } from "rxjs";
 
 interface PaymentClientService {
-  confirmPayment(data: {orderId: string}): Observable<{ status: string }>
+  confirmPayment(data: { orderId: string }): Observable<{ status: string }>;
 }
 
 @Injectable()
 export class PaymentGatewayService implements OnModuleInit {
   private paymentClientService: PaymentClientService;
 
-  constructor(@Inject("PAYMENT_PACKAGE") private readonly client: ClientGrpc){}
+  constructor(@Inject("PAYMENT_PACKAGE") private readonly client: ClientGrpc) {}
 
   onModuleInit() {
-      this.paymentClientService = this.client.getService<PaymentClientService>("PaymentService")
+    this.paymentClientService =
+      this.client.getService<PaymentClientService>("PaymentService");
   }
 
   confirmPayment(orderId: string) {
