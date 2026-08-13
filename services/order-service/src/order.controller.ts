@@ -1,5 +1,5 @@
 import { Controller } from "@nestjs/common";
-import { EventPattern, MessagePattern, Payload } from "@nestjs/microservices";
+import { EventPattern, GrpcMethod, Payload } from "@nestjs/microservices";
 import { CreateOrderService } from "./services/CreateOrder.service";
 import { GetAllOrdersService } from "./services/GetAllOrders.service";
 import type { NewOrder, OrderItems } from "./types/order.entity";
@@ -15,17 +15,17 @@ export class OrderController {
     private readonly getByIdService: GetByIdService,
   ) {}
 
-  @MessagePattern("order.getById")
-  async getOrder(@Payload() payload: string) {
-    return await this.getByIdService.execute(payload);
+  @GrpcMethod("OrderService")
+  async getOrderById(data: { orderId: string }) {
+    return await this.getByIdService.execute(data.orderId);
   }
 
-  @MessagePattern("order.create")
-  async createOrder(@Payload() payload: { items: OrderItems[] }) {
-    return await this.createOrderService.execute(payload.items);
+  @GrpcMethod("OrderService")
+  async createOrder(data: { items: OrderItems[] }) {
+    return await this.createOrderService.execute(data.items);
   }
 
-  @MessagePattern("order.getAll")
+  @GrpcMethod("OrderService")
   async getAllOrders() {
     return await this.getAllOrdersService.execute();
   }

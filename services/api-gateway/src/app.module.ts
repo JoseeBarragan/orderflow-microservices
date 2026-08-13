@@ -1,31 +1,39 @@
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { GatewayController } from './gateway.controller';
-import { GatewayService } from './services/gateway.service';
 import { join } from "path";
 import { PaymentGatewayService } from './services/paymentClient.service';
+import { OrderGatewayService } from './services/OrderClient.service';
 
-const protoPath = join(__dirname, "proto/payment.proto");
+const protoPath = (service: string) =>  {return join(__dirname, `proto/${service}.proto`)};
 
 @Module({
   imports: [
     ClientsModule.register([
       {
-        name: 'INVENTORY_SERVICE',
-        transport: Transport.TCP,
-        options: { host: 'localhost', port: 3001 },
+        name: "INVENTORY_PACKAGE",
+        transport: Transport.GRPC,
+        options: {
+          package: "inventory",
+          protoPath: protoPath("inventory"),
+          url: "localhost:5005"
+        },
       },
       {
-        name: 'ORDER_SERVICE',
-        transport: Transport.TCP,
-        options: { host: 'localhost', port: 3002 },
+        name: "ORDER_PACKAGE",
+        transport: Transport.GRPC,
+        options: { 
+          package: "order",
+          protoPath: protoPath("order"),
+          url: "localhost:5005"
+        },
       },
       {
         name: "PAYMENT_PACKAGE",
         transport: Transport.GRPC,
         options: {
           package: "payment",
-          protoPath: protoPath,
+          protoPath: protoPath("payment"),
           url: "localhost:5005"
         }
       }
@@ -33,8 +41,8 @@ const protoPath = join(__dirname, "proto/payment.proto");
   ],
   controllers: [GatewayController],
   providers: [
-    GatewayService,
     PaymentGatewayService,
+    OrderGatewayService,
   ],
 })
 export class AppModule {}

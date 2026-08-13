@@ -1,30 +1,30 @@
 import { Body, Controller, Get, InternalServerErrorException, NotFoundException, Param, Post } from "@nestjs/common";
 import { CreateOrderDto } from "./dto/order.dto";
-import { GatewayService } from "./services/gateway.service";
 import { lastValueFrom } from "rxjs";
 import { status } from "@grpc/grpc-js";
 import { PaymentGatewayService } from "./services/paymentClient.service";
+import { OrderGatewayService } from "./services/OrderClient.service";
 
 @Controller()
 export class GatewayController {
   constructor(
-    private readonly gatewayService: GatewayService,
     private readonly paymentService: PaymentGatewayService,
+    private readonly orderService: OrderGatewayService,
   ) {}
 
   @Get("inventory")
   getInventory() {
-    return this.gatewayService.send("INVENTORY", "inventory.get", {});
+    return;
   }
 
   @Post("order")
   createOrder(@Body() dto: CreateOrderDto) {
-    return this.gatewayService.send("ORDERS", "order.create", dto);
+    return;
   }
 
   @Get("order/:id")
   getOrderById(@Param("id") id: string) {
-    return this.gatewayService.send("ORDERS", "order.getById", id);
+    return lastValueFrom(this.orderService.GetOrderById(id));
   }
 
   @Post("order/:id/confirm-payment")
@@ -45,6 +45,6 @@ export class GatewayController {
 
   @Get("order")
   getAllOrders() {
-    return this.gatewayService.send("ORDERS", "order.getAll", {});
+    return lastValueFrom(this.orderService.GetAllOrders());
   }
 }

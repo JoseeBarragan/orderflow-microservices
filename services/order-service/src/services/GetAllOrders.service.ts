@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { OrderRepository } from "src/order.repository";
+import { OrderRepository } from "../order.repository";
 
 @Injectable()
 export class GetAllOrdersService {

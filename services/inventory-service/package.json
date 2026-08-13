@@ -6,12 +6,13 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
+    "sync-proto": "cp ../proto/inventory.proto src/proto/inventory.proto",
+    "build": "npm run sync-proto && nest build"
     "db:clean": "psql \"postgresql://inventory-user:inventory-pass@localhost:5432/inventory-db\" -f sql/clean.sql",
-    "build": "nest build",
     "seed": "sh -c 'set -a; . ./.env; set +a; psql \"$DATABASE_URL\" -f sql/seed-products.sql'",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
-    "start:dev": "nest start --watch",
+    "start:dev": "npm run sync-proto && nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",

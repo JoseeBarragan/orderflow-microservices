@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package order;
+
+import "google/protobuf/empty.proto";
+
+service OrderService {
+  rpc GetOrderById (OrderId) returns (Order);
+  rpc GetAllOrders (google.protobuf.Empty) returns (ManyOrders);
+}
+
+message OrderId {
+  string orderId = 1;
+}
+
+message OrderItems {
+  string productId = 1;
+  int32 quantity = 2;
+  int32 unitPrice = 3;
+}
+
+message Order {
+  string orderId = 1;
+  int32 totalAmount = 2;
+  repeated OrderItems items = 3;
+}
+
+message ManyOrders {
+  repeated Order orders = 1;
+}
+

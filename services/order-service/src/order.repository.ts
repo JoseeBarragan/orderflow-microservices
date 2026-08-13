@@ -1,6 +1,8 @@
 import { Injectable, ServiceUnavailableException } from "@nestjs/common";
 import { PrismaService } from "./prisma.service";
 import { OrderItems, OrderStatus } from "./types/order.entity";
+import { RpcException } from "@nestjs/microservices";
+import { status } from "@grpc/grpc-js";
 
 @Injectable()
 export class OrderRepository {
@@ -8,21 +10,40 @@ export class OrderRepository {
 
   async getById(id: string) {
     try {
-      return await this.prisma.order.findUnique({ where: { id: id } });
+      return await this.prisma.order.findUnique({
+        where: { orderId: id },
+        include: { items: true },
+      });
     } catch (err) {
-      throw new ServiceUnavailableException(
-        `Ocurrio un error en el servicio de Prisma ${err}`,
-      );
+      throw new RpcException({
+        code: status.INTERNAL,
+        message: `Ocurrio un error en el servicio de Prisma ${err}`,
+      });
     }
   }
 
   async getAll() {
     try {
-      return await this.prisma.order.findMany();
+      const orders = await this.prisma.order.findMany({
+        include: { items: true },
+      });
+
+      return {
+        orders: orders.map((order) => ({
+          orderId: order.orderId,
+          totalAmount: Number(order.totalAmount),
+          items: order.items.map((item) => ({
+            productId: item.productId,
+            quantity: item.quantity,
+            unitPrice: Number(item.unitPrice),
+          })),
+        })),
+      };
     } catch (err) {
-      throw new ServiceUnavailableException(
-        `Ocurrio un error en el servicio de Prisma ${err}`,
-      );
+      throw new RpcException({
+        code: status.INTERNAL,
+        message: `Ocurrio un error en el servicio de Prisma ${err}`,
+      });
     }
   }
 
@@ -43,7 +64,7 @@ export class OrderRepository {
           data: {
             eventType: "order.created",
             payload: {
-              orderId: order.id,
+              orderId: order.orderId,
               items: newItems,
               totalAmount: total,
             },
@@ -62,7 +83,7 @@ export class OrderRepository {
   async updateStatusOrder(orderId: string, status: OrderStatus) {
     try {
       return await this.prisma.order.update({
-        where: { id: orderId },
+        where: { orderId: orderId },
         data: {
           status: status,
         },

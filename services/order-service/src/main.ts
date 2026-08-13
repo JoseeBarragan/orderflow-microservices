@@ -1,13 +1,18 @@
 import { NestFactory } from "@nestjs/core";
 import { MicroserviceOptions, Transport } from "@nestjs/microservices";
 import { OrderModule } from "./order.module";
+import { join } from "path";
 
 async function bootstrap() {
   const app = await NestFactory.create(OrderModule);
 
   app.connectMicroservice({
-    transport: Transport.TCP,
-    options: { host: "localhost", port: 3002 },
+    transport: Transport.GRPC,
+    options: {
+      package: "order",
+      protoPath: join(__dirname, "..", "proto/order.proto"),
+      url: "0.0.0.0:5005",
+    },
   });
 
   app.connectMicroservice<MicroserviceOptions>({

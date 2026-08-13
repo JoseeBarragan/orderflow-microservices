@@ -7,12 +7,15 @@ import {
 import { Observable, throwError } from "rxjs";
 import { RpcException } from "@nestjs/microservices";
 
-@Catch(RpcException)
-export class GrpcExceptionFilter implements RpcExceptionFilter<RpcException> {
-  private readonly logger = new Logger(GrpcExceptionFilter.name);
+@Catch()
+export class RmqExceptionFilter implements RpcExceptionFilter<RpcException> {
+  private readonly logger = new Logger(RmqExceptionFilter.name);
 
   catch(exception: RpcException, host: ArgumentsHost): Observable<any> {
-    this.logger.error(`Error en gRPC: ${JSON.stringify(exception.getError())}`);
+    this.logger.error(
+      `Error procesando evento: ${exception?.message}`,
+      exception?.stack,
+    );
     return throwError(() => exception.getError());
   }
 }

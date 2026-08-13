@@ -1,20 +1,21 @@
 import { Module } from "@nestjs/common";
-import { PaymentController } from "./payment.controller";
 import { PrismaService } from "./prisma.service";
 import { PaymentRepository } from "./Repository/payment.repository";
 import { ConfirmPaymentService } from "./services/ConfirmPayment.service";
 import { ConfigModule } from "@nestjs/config";
 import { CreatePaymentService } from "./services/CreatePayment.service";
-import { ExceptionFilter } from "./services/rpc-exception.filter";
+import { PaymentGrpcController } from "./payment.grpc.controller";
+import { PaymentEventController } from "./payment.rmq.controller";
+import { GrpcExceptionFilter } from "./services/rpc-exception.filter";
 
 @Module({
   imports: [ConfigModule.forRoot({ isGlobal: true })],
-  controllers: [PaymentController],
+  controllers: [PaymentGrpcController, PaymentEventController],
   providers: [
     PrismaService,
     PaymentRepository,
     ConfirmPaymentService,
-    ExceptionFilter,
+    GrpcExceptionFilter,
     CreatePaymentService,
   ],
 })

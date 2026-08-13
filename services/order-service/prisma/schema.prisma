@@ -20,7 +20,7 @@ enum OrderStatus {
 }
 
 model Order {
-  id          String      @id @default(uuid())
+  orderId          String      @id @default(uuid()) @map("id")
   status      OrderStatus @default(PENDING)
   totalAmount Decimal     @db.Decimal(10, 2)
   items       OrderItem[]
@@ -31,9 +31,9 @@ model Order {
 }
 
 model OrderItem {
-  id        String  @id @default(uuid())
+  orderItemId        String  @id @default(uuid()) @map("id")
   orderId   String
-  order     Order   @relation(fields: [orderId], references: [id])
+  order     Order   @relation(fields: [orderId], references: [orderId])
   productId String
   quantity  Int
   unitPrice Decimal @db.Decimal(10, 2)
