@@ -1,6 +1,6 @@
-import { Injectable, ServiceUnavailableException } from "@nestjs/common";
-import { PrismaService } from "./prisma.service";
-import { OrderItems, OrderStatus } from "./types/order.entity";
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "../prisma.service";
+import { OrderItems, OrderStatus } from "../types/order.entity";
 import { RpcException } from "@nestjs/microservices";
 import { status } from "@grpc/grpc-js";
 
@@ -74,51 +74,26 @@ export class OrderRepository {
         return order;
       });
     } catch (err) {
-      throw new ServiceUnavailableException(
-        `Ocurrio un error en el servicio de Prisma ${err}`,
-      );
+      throw new RpcException({
+        code: status.INTERNAL,
+        message: `Ocurrio un error en el servicio de Prisma ${err}`,
+      });
     }
   }
 
-  async updateStatusOrder(orderId: string, status: OrderStatus) {
+  async updateStatusOrder(orderId: string, orderStatus: OrderStatus) {
     try {
       return await this.prisma.order.update({
         where: { orderId: orderId },
         data: {
-          status: status,
+          status: orderStatus,
         },
       });
     } catch (err) {
-      throw new ServiceUnavailableException(
-        `Ocurrio un error en el servicio de Prisma ${err}`,
-      );
-    }
-  }
-
-  async getPendingMessage() {
-    try {
-      return await this.prisma.outboxEvent.findMany({
-        where: { published: false },
-        orderBy: { createdAt: "asc" },
-        take: 20,
+      throw new RpcException({
+        code: status.INTERNAL,
+        message: `Ocurrio un error en el servicio de Prisma ${err}`,
       });
-    } catch (err) {
-      throw new ServiceUnavailableException(
-        `Ocurrio un error en el servicio de Prisma ${err}`,
-      );
-    }
-  }
-
-  async updateMessagePublish(id: string, Published: boolean) {
-    try {
-      return await this.prisma.outboxEvent.update({
-        where: { id: id },
-        data: { published: Published, publishedAt: new Date() },
-      });
-    } catch (err) {
-      throw new ServiceUnavailableException(
-        `Ocurrio un error en el servicio de Prisma ${err}`,
-      );
     }
   }
 }

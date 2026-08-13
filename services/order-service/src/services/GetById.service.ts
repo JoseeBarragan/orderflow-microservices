@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
-import { OrderRepository } from "../order.repository";
 import { RpcException } from "@nestjs/microservices";
 import { status } from "@grpc/grpc-js";
+import { OrderRepository } from "src/Repository/order.repository";
 
 @Injectable()
 export class GetByIdService {

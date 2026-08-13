@@ -1,4 +1,12 @@
-import { Body, Controller, Get, InternalServerErrorException, NotFoundException, Param, Post } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  InternalServerErrorException,
+  NotFoundException,
+  Param,
+  Post,
+} from "@nestjs/common";
 import { CreateOrderDto } from "./dto/order.dto";
 import { lastValueFrom } from "rxjs";
 import { status } from "@grpc/grpc-js";
@@ -18,33 +26,56 @@ export class GatewayController {
   }
 
   @Post("order")
-  createOrder(@Body() dto: CreateOrderDto) {
-    return;
+  async createOrder(@Body() dto: CreateOrderDto) {
+    return lastValueFrom(this.orderService.CreateOrder(dto)).catch((err) => {
+      if (err.code === status.NOT_FOUND) {
+        throw new NotFoundException(err.message ?? "Ordern no encontrada");
+      }
+
+      throw new InternalServerErrorException(
+        err.message ?? "Error inesperado en el servidor",
+      );
+    });
   }
 
   @Get("order/:id")
-  getOrderById(@Param("id") id: string) {
-    return lastValueFrom(this.orderService.GetOrderById(id));
+  async getOrderById(@Param("id") id: string) {
+    return lastValueFrom(this.orderService.GetOrderById(id)).catch((err) => {
+      if (err.code === status.NOT_FOUND) {
+        throw new NotFoundException(err.message ?? "Ordern no encontrada");
+      }
+
+      throw new InternalServerErrorException(
+        err.message ?? "Error inesperado en el servidor",
+      );
+    });
   }
 
   @Post("order/:id/confirm-payment")
-  confirmPayment(@Param("id") id: string) {
+  async confirmPayment(@Param("id") id: string) {
     return lastValueFrom(this.paymentService.confirmPayment(id)).catch(
       (err) => {
-
         if (err.code === status.NOT_FOUND) {
-          throw new NotFoundException(err.details ?? "Pago no encontrado");
+          throw new NotFoundException(err.message ?? "Pago no encontrado");
         }
 
         throw new InternalServerErrorException(
-          err.details ?? "Error inesperado confirmando el pago",
+          err.message ?? "Error inesperado confirmando el pago",
         );
       },
     );
   }
 
   @Get("order")
-  getAllOrders() {
-    return lastValueFrom(this.orderService.GetAllOrders());
+  async getAllOrders() {
+    return lastValueFrom(this.orderService.GetAllOrders()).catch((err) => {
+      if (err.code === status.NOT_FOUND) {
+        throw new NotFoundException(err.message ?? "Ordern no encontrada");
+      }
+
+      throw new InternalServerErrorException(
+        err.message ?? "Error inesperado en el servidor",
+      );
+    });
   }
 }

@@ -1,12 +1,12 @@
 import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
-import { OrderRepository } from "../order.repository";
 import { ClientProxy } from "@nestjs/microservices";
+import { OutboxRepository } from "src/Repository/outbox.repository";
 import { OutboxEventType } from "src/types/order.entity";
 
 @Injectable()
 export class OutboxPublisher implements OnModuleInit {
   constructor(
-    private readonly orderRepository: OrderRepository,
+    private readonly outboxRepository: OutboxRepository,
     @Inject("RMQ_CLIENT") private readonly client: ClientProxy,
   ) {}
 
@@ -17,7 +17,7 @@ export class OutboxPublisher implements OnModuleInit {
   }
 
   private async publishPending(): Promise<void> {
-    const messages = await this.orderRepository.getPendingMessage();
+    const messages = await this.outboxRepository.getPendingMessage();
 
     if (messages.length === 0) return;
 
@@ -29,7 +29,7 @@ export class OutboxPublisher implements OnModuleInit {
 
       try {
         this.client.emit(msg.eventType, msg.payload);
-        await this.orderRepository.updateMessagePublish(msg.id, true);
+        await this.outboxRepository.updateMessagePublish(msg.id, true);
       } catch (err) {
         console.error(`Error publicando mensaje ${msg.id}: ${err}`);
       }

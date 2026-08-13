@@ -1,7 +1,5 @@
 import { Module } from "@nestjs/common";
-import { OrderController } from "./order.controller";
 import { PrismaService } from "./prisma.service";
-import { OrderRepository } from "./order.repository";
 import { ConfigModule } from "@nestjs/config";
 import { CreateOrderService } from "./services/CreateOrder.service";
 import { GetAllOrdersService } from "./services/GetAllOrders.service";
@@ -9,6 +7,10 @@ import { OutboxPublisher } from "./messaging/outbox.publisher";
 import { ClientsModule, Transport } from "@nestjs/microservices";
 import { CancelOrderService } from "./services/CancelOrder.service";
 import { GetByIdService } from "./services/GetById.service";
+import { OrderRepository } from "./Repository/order.repository";
+import { OutboxRepository } from "./Repository/outbox.repository";
+import { OrderEventController } from "./order.rmq.controller";
+import { OrderGrpcController } from "./order.grpc.controller";
 
 @Module({
   imports: [
@@ -29,11 +31,12 @@ import { GetByIdService } from "./services/GetById.service";
       },
     ]),
   ],
-  controllers: [OrderController],
+  controllers: [OrderEventController, OrderGrpcController],
   providers: [
     CreateOrderService,
     PrismaService,
     OrderRepository,
+    OutboxRepository,
     GetAllOrdersService,
     OutboxPublisher,
     CancelOrderService,
