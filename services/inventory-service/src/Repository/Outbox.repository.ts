@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-} from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "../prisma.service";
 import { OutboxEventType, OutboxPayload } from "../types/Inventory.types";
 import { InputJsonValue } from "@prisma/client/runtime/client";
@@ -31,9 +27,7 @@ export class OutboxRepository {
       });
     } catch (err) {
       this.logger.error(err);
-      throw new InternalServerErrorException(
-        `Ocurrio un error en el servicio de Prisma ${err}`,
-      );
+      throw err;
     }
   }
 
@@ -46,9 +40,7 @@ export class OutboxRepository {
       });
     } catch (err) {
       this.logger.error(err);
-      throw new InternalServerErrorException(
-        `Ocurrio un error en el servicio de Prisma ${err}`,
-      );
+      throw err;
     }
   }
 
@@ -60,9 +52,7 @@ export class OutboxRepository {
       });
     } catch (err) {
       this.logger.error(err);
-      throw new InternalServerErrorException(
-        `Ocurrio un error en el servicio de Prisma ${err}`,
-      );
+      throw err;
     }
   }
 }

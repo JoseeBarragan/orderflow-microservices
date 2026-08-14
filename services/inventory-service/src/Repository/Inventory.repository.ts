@@ -1,11 +1,9 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-} from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "../prisma.service";
-import { NewOrder, Product } from "../types/Inventory.types";
+import { GetAllReturnType, NewOrder } from "../types/Inventory.types";
 import { StockUnavailableError } from "../types/Error.types";
+import { RpcException } from "@nestjs/microservices";
+import { status } from "@grpc/grpc-js";
 
 @Injectable()
 export class InventoryRepository {
@@ -13,16 +11,27 @@ export class InventoryRepository {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(limit = 50, offset = 0): Promise<Product[]> {
+  async findAll(limit = 50, offset = 0): Promise<GetAllReturnType> {
     try {
-      return await this.prisma.products.findMany({
+      const products = await this.prisma.products.findMany({
         take: limit,
         skip: offset,
         orderBy: { created_at: "desc" },
       });
+      return {
+        items: products.map((product) => ({
+          id: product.id,
+          name: product.name,
+          unitPriceCents: Math.round(Number(product.unitPrice) * 100),
+          availableStock: product.available_stock,
+        })),
+      };
     } catch (err) {
       this.logger.error(`Error al buscar productos: ${err}`);
-      throw new InternalServerErrorException("Error en el servidor, ", err);
+      throw new RpcException({
+        code: status.INTERNAL,
+        message: `Error en el servsdor, ${err}`,
+      });
     }
   }
 
@@ -33,7 +42,7 @@ export class InventoryRepository {
       });
     } catch (err) {
       this.logger.error(`Error al buscar productos: ${err}`);
-      throw new InternalServerErrorException("Error en el servidor, ", err);
+      throw err;
     }
   }
 
@@ -83,7 +92,7 @@ export class InventoryRepository {
         return { success: false, reason: err.message };
       }
       this.logger.error(`Error al guardar el stock ${err}`);
-      throw new InternalServerErrorException("Error en el servidor, ", err);
+      throw err;
     }
   }
 }

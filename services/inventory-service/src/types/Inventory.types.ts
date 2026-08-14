@@ -1,10 +1,12 @@
 export interface Product {
   id: string;
   name: string;
-  available_stock: number;
-  reserved_stock: number;
-  created_at: Date;
-  updated_at: Date;
+  unitPriceCents: number;
+  availableStock: number;
+}
+
+export interface GetAllReturnType {
+  items: Product[];
 }
 
 export interface ListProductsQuery {

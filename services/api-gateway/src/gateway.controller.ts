@@ -6,23 +6,28 @@ import {
   NotFoundException,
   Param,
   Post,
+  Query,
 } from "@nestjs/common";
 import { CreateOrderDto } from "./dto/order.dto";
 import { lastValueFrom } from "rxjs";
 import { status } from "@grpc/grpc-js";
 import { PaymentGatewayService } from "./services/paymentClient.service";
 import { OrderGatewayService } from "./services/OrderClient.service";
+import { InventoryGatewayService } from "./services/InventoryClient.service";
 
 @Controller()
 export class GatewayController {
   constructor(
     private readonly paymentService: PaymentGatewayService,
     private readonly orderService: OrderGatewayService,
+    private readonly inventoryService: InventoryGatewayService,
   ) {}
 
   @Get("inventory")
-  getInventory() {
-    return;
+  getInventory(@Query() query: { limit: string; offset: string }) {
+    const limit = query.limit ? Number(query.limit) : 50;
+    const offset = query.offset ? Number(query.offset) : 0;
+    return lastValueFrom(this.inventoryService.getAll(limit, offset));
   }
 
   @Post("order")

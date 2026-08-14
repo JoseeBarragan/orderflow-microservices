@@ -7,7 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "sync-proto": "cp ../proto/inventory.proto src/proto/inventory.proto",
-    "build": "npm run sync-proto && nest build"
+    "build": "npm run sync-proto && nest build",
     "db:clean": "psql \"postgresql://inventory-user:inventory-pass@localhost:5432/inventory-db\" -f sql/clean.sql",
     "seed": "sh -c 'set -a; . ./.env; set +a; psql \"$DATABASE_URL\" -f sql/seed-products.sql'",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -23,6 +23,8 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@grpc/grpc-js": "^1.14.4",
+    "@grpc/proto-loader": "^0.8.1",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.0.1",
