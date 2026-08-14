@@ -31,12 +31,6 @@ export class ReserveStockService {
       });
       return;
     }
-
-    await this.outboxRepository.save("stock.reserve", {
-      orderId: payload.orderId,
-      items: payload.items,
-      totalAmount: payload.totalAmount,
-    });
     return;
   }
 }

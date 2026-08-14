@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package payment;
+
+service PaymentService {
+  rpc ConfirmPayment (ConfirmPaymentRequest) returns (ConfirmPaymentResponse);
+}
+
+message ConfirmPaymentRequest {
+  string orderId = 1;
+}
+
+message ConfirmPaymentResponse {
+  string status = 1;
+}
+

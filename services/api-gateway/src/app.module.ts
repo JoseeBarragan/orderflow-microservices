@@ -26,7 +26,7 @@ const protoPath = (service: string) =>  {return join(__dirname, `proto/${service
         options: { 
           package: "order",
           protoPath: protoPath("order"),
-          url: "localhost:5005"
+          url: "localhost:5006"
         },
       },
       {
@@ -35,7 +35,7 @@ const protoPath = (service: string) =>  {return join(__dirname, `proto/${service
         options: {
           package: "payment",
           protoPath: protoPath("payment"),
-          url: "localhost:5005"
+          url: "localhost:5007"
         }
       }
     ]),

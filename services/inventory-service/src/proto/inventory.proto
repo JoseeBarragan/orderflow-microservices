@@ -15,7 +15,7 @@ message Product {
   string id = 1;
   string name = 2;
   int64 unitPriceCents = 3;
-  int32 available_stock = 4;
+  int32 availableStock = 4;
 }
 
 message GetAllResponse {

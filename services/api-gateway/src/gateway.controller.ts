@@ -7,6 +7,7 @@ import {
   Param,
   Post,
   Query,
+  UnprocessableEntityException,
 } from "@nestjs/common";
 import { CreateOrderDto } from "./dto/order.dto";
 import { lastValueFrom } from "rxjs";
@@ -24,10 +25,16 @@ export class GatewayController {
   ) {}
 
   @Get("inventory")
-  getInventory(@Query() query: { limit: string; offset: string }) {
+  async getInventory(@Query() query: { limit: string; offset: string }) {
     const limit = query.limit ? Number(query.limit) : 50;
     const offset = query.offset ? Number(query.offset) : 0;
-    return lastValueFrom(this.inventoryService.getAll(limit, offset));
+    return lastValueFrom(this.inventoryService.getAll(limit, offset)).catch(
+      (err) => {
+        throw new InternalServerErrorException(
+          err.message ?? "Error inesperado en el servidor",
+        );
+      },
+    );
   }
 
   @Post("order")
@@ -62,6 +69,9 @@ export class GatewayController {
       (err) => {
         if (err.code === status.NOT_FOUND) {
           throw new NotFoundException(err.message ?? "Pago no encontrado");
+        }
+        if(err.code === status.ABORTED) {
+          throw new UnprocessableEntityException("Error a la hora de realizar el pago, vuelva a intentarlo")
         }
 
         throw new InternalServerErrorException(
