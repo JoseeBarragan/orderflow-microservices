@@ -1,7 +1,6 @@
 import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
-import { ClientProxy } from "@nestjs/microservices";
 import { OutboxRepository } from "../Repository/outbox.repository";
-import { OutboxEventType } from "../types/order.entity";
+import { ClientProxy } from "@nestjs/microservices";
 
 @Injectable()
 export class OutboxPublisher implements OnModuleInit {
@@ -12,17 +11,17 @@ export class OutboxPublisher implements OnModuleInit {
 
   onModuleInit() {
     setInterval(() => {
-      void this.publishPending();
+      void this.PublishPending();
     }, 1000);
   }
 
-  private async publishPending(): Promise<void> {
-    const messages = await this.outboxRepository.getPendingMessage();
+  async PublishPending() {
+    const messages = await this.outboxRepository.getPendingMessages();
 
     if (messages.length === 0) return;
 
     for (const msg of messages) {
-      if (!this.isOutboxEventType(msg.eventType)) {
+      if (!this.isOutboxEvent(msg.eventType)) {
         console.error(`Tipo de evento desconocido: ${msg.eventType}`);
         continue;
       }
@@ -36,7 +35,7 @@ export class OutboxPublisher implements OnModuleInit {
     }
   }
 
-  private isOutboxEventType(value: string): value is OutboxEventType {
-    return value === "order.created";
+  private isOutboxEvent(event: string) {
+    return event === "payment.failed" || event === "payment.succed";
   }
 }

@@ -8,11 +8,29 @@ export class PaymentRepository {
   private readonly logger = new Logger(PaymentRepository.name);
   constructor(private readonly prisma: PrismaService) {}
 
-  async confirmPayment(orderId: string) {
+  async confirmPayment(
+    orderId: string,
+    status: "APPROVED" | "FAILED",
+    eventType: string,
+    payload: Record<string, string>,
+  ) {
     try {
-      return await this.prisma.payment.update({
-        where: { orderId: orderId },
-        data: { status: "PAID" },
+      return await this.prisma.$transaction(async (tx) => {
+        await tx.payment.update({
+          where: { orderId: orderId },
+          data: {
+            status: status,
+          },
+        });
+
+        await tx.outboxEvent.create({
+          data: {
+            eventType: eventType,
+            payload: payload,
+          },
+        });
+
+        return payload;
       });
     } catch (err) {
       if (

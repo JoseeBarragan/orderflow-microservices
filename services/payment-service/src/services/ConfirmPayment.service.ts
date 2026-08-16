@@ -9,27 +9,25 @@ export class ConfirmPaymentService {
   constructor(private readonly paymentRepository: PaymentRepository) {}
 
   async execute(orderId: string) {
+    const isPaymentSuccessful = Math.random() < 0.8;
+    const newStatus = isPaymentSuccessful ? "APPROVED" : "FAILED";
+    const eventType = isPaymentSuccessful
+      ? "payment.approved"
+      : "payment.failed";
+
     try {
-      const isPaymentSuccessful = Math.random() < 0.8;
-
-      if (isPaymentSuccessful) {
-        throw new Error("SIMULATED_PAYMENT_ERROR");
-      }
-
-      return await this.paymentRepository.confirmPayment(orderId);
+      await this.paymentRepository.confirmPayment(
+        orderId,
+        newStatus,
+        eventType,
+        { orderId },
+      );
+      return { status: newStatus };
     } catch (err) {
       if (err instanceof PaymentNotFoundError) {
         throw new RpcException({
           code: status.NOT_FOUND,
           message: err.message,
-        });
-      } else if (
-        err instanceof Error &&
-        err.message === "SIMULATED_PAYMENT_ERROR"
-      ) {
-        throw new RpcException({
-          code: status.ABORTED,
-          message: "El pago fue rechazado por la pasarela",
         });
       }
       throw new RpcException({
