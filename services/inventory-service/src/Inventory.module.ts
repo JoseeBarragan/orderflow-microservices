@@ -9,6 +9,7 @@ import { InventoryRepository } from "./Repository/Inventory.repository";
 import { OutboxRepository } from "./Repository/Outbox.repository";
 import { InventoryRmqController } from "./Inventory.rmq.controller";
 import { InventoryGrpcController } from "./Inventory.grpc.controller";
+import { ReleaseStockService } from "./services/ReleaseStock.service";
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { InventoryGrpcController } from "./Inventory.grpc.controller";
     OutboxRepository,
     ReserveStockService,
     OutboxPublisher,
+    ReleaseStockService,
   ],
 })
 export class InventoryModule {}

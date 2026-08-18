@@ -95,4 +95,42 @@ export class InventoryRepository {
       throw err;
     }
   }
+
+  async releaseStock(orderId: string) {
+    try {
+      return await this.prisma.$transaction(async (tx) => {
+        const reservations = await tx.stock_reservations.findMany({
+          where: { order_id: orderId, released: false },
+        });
+
+        if (reservations.length === 0) {
+          this.logger.warn(
+            `No se encontraron reservas activas para la orden ${orderId}`,
+          );
+          return;
+        }
+
+        for (const reservation of reservations) {
+          await tx.products.update({
+            where: { id: reservation.product_id },
+            data: {
+              available_stock: { increment: reservation.quantity },
+              reserved_stock: { decrement: reservation.quantity },
+            },
+          });
+
+          await tx.stock_reservations.update({
+            where: { id: reservation.id },
+            data: { released: true },
+          });
+        }
+      });
+    } catch (err) {
+      this.logger.error(`Error al buscar productos: ${err}`);
+      throw new RpcException({
+        code: status.INTERNAL,
+        message: `Error en el servsdor, ${err}`,
+      });
+    }
+  }
 }
