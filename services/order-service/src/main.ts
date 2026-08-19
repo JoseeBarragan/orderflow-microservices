@@ -21,8 +21,21 @@ async function bootstrap() {
       urls: ["amqp://localhost:5672"],
       exchange: "orderflow.events",
       exchangeType: "topic",
-      queue: "order-service.consumer.queue",
+      queue: "order-service.stock-rejected.queue",
       routingKey: "stock.*",
+      wildcards: true,
+      queueOptions: { durable: true },
+    },
+  });
+
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.RMQ,
+    options: {
+      urls: ["amqp://localhost:5672"],
+      exchange: "orderflow.events",
+      exchangeType: "topic",
+      queue: "order-service.payment-failed.queue",
+      routingKey: "payment.failed",
       wildcards: true,
       queueOptions: { durable: true },
     },

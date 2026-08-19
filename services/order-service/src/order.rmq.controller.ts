@@ -22,4 +22,9 @@ export class OrderEventController {
   ) {
     await this.cancelOrderService.execute(payload.orderId);
   }
+
+  @EventPattern("payment.failed")
+  async handlePaymentFailed(@Payload() orderId: string) {
+    await this.cancelOrderService.execute(orderId);
+  }
 }
