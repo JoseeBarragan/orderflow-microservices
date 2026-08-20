@@ -19,7 +19,7 @@ export class InventoryRmqController {
   }
 
   @EventPattern("payment.failed")
-  async releaseStock(@Payload() orderId: string) {
-    return await this.releaseStockService.execute(orderId);
+  async releaseStock(@Payload() payload: { orderId: string }) {
+    return await this.releaseStockService.execute(payload.orderId);
   }
 }

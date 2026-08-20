@@ -24,7 +24,7 @@ export class OrderEventController {
   }
 
   @EventPattern("payment.failed")
-  async handlePaymentFailed(@Payload() orderId: string) {
-    await this.cancelOrderService.execute(orderId);
+  async handlePaymentFailed(@Payload() payload: { orderId: string }) {
+    await this.cancelOrderService.execute(payload.orderId);
   }
 }

@@ -36,6 +36,6 @@ export class OutboxPublisher implements OnModuleInit {
   }
 
   private isOutboxEvent(event: string) {
-    return event === "payment.failed" || event === "payment.succed";
+    return event === "payment.failed" || event === "payment.approved";
   }
 }

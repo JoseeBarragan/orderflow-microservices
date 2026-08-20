@@ -21,9 +21,8 @@ async function bootstrap() {
       urls: ["amqp://localhost:5672"],
       exchange: "orderflow.events",
       exchangeType: "topic",
-      queue: "order-service.stock-rejected.queue",
+      queue: "order-service.stock.queue",
       routingKey: "stock.*",
-      wildcards: true,
       queueOptions: { durable: true },
     },
   });
@@ -36,7 +35,6 @@ async function bootstrap() {
       exchangeType: "topic",
       queue: "order-service.payment-failed.queue",
       routingKey: "payment.failed",
-      wildcards: true,
       queueOptions: { durable: true },
     },
   });
