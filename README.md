@@ -110,8 +110,8 @@ Avoids keeping manually-maintained, easily-desynced copies between the gateway a
 - [x] `inventory-service`: atomic stock reservation, Outbox
 - [x] `payment-service`: pending payment creation, confirmation via gRPC
 - [x] Migrating gateway ↔ service communication from TCP to gRPC 
-- [ ] Full compensation: releasing stock when payment fails (in progress)
-- [ ] `notification-service`
+- [x] Full compensation: releasing stock when payment fails (in progress)
+- [x] `notification-service`
 
 ## Key takeaways from the project
 
