@@ -5,11 +5,16 @@ import { join } from "path";
 import { PaymentGatewayService } from './services/paymentClient.service';
 import { OrderGatewayService } from './services/OrderClient.service';
 import { InventoryGatewayService } from './services/InventoryClient.service';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 const protoPath = (service: string) =>  {return join(__dirname, `proto/${service}.proto`)};
 
 @Module({
   imports: [
+    ThrottlerModule.forRoot([{
+      ttl: 60000,
+      limit: 100,
+    }]),
     ClientsModule.register([
       {
         name: "INVENTORY_PACKAGE",
