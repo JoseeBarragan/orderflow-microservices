@@ -7,7 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "sync-proto": "cp ../proto/payment.proto src/proto/payment.proto && cp ../proto/order.proto src/proto/order.proto && cp ../proto/inventory.proto src/proto/inventory.proto",
-    "build": "npm run sync-proto && nest build",
+    "build": "nest build",
     "start": "nest start",
     "start:dev": "npm run sync-proto && nest start --watch",
     "start:debug": "nest start --debug --watch",
