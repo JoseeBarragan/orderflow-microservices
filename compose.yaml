@@ -1,4 +1,48 @@
 services: 
+  gateway:
+    build:
+      context: ./services/api-gateway
+      dockerfile: dockerfile
+    ports:
+      - "3000:3000"
+
+  inventory: 
+    build: 
+      context: ./services/inventory-service
+      dockerfile: dockerfile
+    env_file:
+      - ./services/inventory-service/.env
+    depends_on:
+      - inventory-db
+      - rabbitmq
+  
+  notification:
+    build: 
+      context: ./services/notification-service
+      dockerfile: dockerfile
+    depends_on:
+      - rabbitmq
+
+  order: 
+    build: 
+      context: ./services/order-service
+      dockerfile: dockerfile
+    env_file:
+      - ./services/order-service/.env
+    depends_on:
+      - rabbitmq
+      - orders-db
+
+  payment:
+    build: 
+      context: ./services/payment-service
+      dockerfile: dockerfile
+    env_file: 
+      - ./services/payment-service/.env
+    depends_on:
+      - rabbitmq
+      - payment-db
+
   rabbitmq:
     image: rabbitmq:3.13-management
     ports:

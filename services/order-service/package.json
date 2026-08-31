@@ -8,7 +8,7 @@
   "scripts": {
     "sync-proto": "cp ../proto/order.proto src/proto/order.proto",
     "db:clean": "psql \"postgresql://orders_user:orders_pass@localhost:5433/orders_db\" -f sql/clean.sql",
-    "build": "npm run sync-proto && nest build",
+    "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "npm run sync-proto && nest start --watch",
