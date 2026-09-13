@@ -1,0 +1,380 @@
+{
+  "configuration" : { },
+  "description" : "Sistema de e-commerce basado en eventos, microservicios y saga orquestada",
+  "documentation" : { },
+  "id" : 1,
+  "lastModifiedDate" : "2026-09-10T23:26:54Z",
+  "model" : {
+    "people" : [ {
+      "description" : "Compra productos en la tienda",
+      "id" : "1",
+      "name" : "Cliente",
+      "properties" : {
+        "structurizr.dsl.identifier" : "customer"
+      },
+      "relationships" : [ {
+        "description" : "Crea una orden",
+        "destinationId" : "3",
+        "id" : "13",
+        "sourceId" : "1",
+        "tags" : "Relationship",
+        "technology" : "HTTP"
+      }, {
+        "description" : "Crea una orden",
+        "destinationId" : "2",
+        "id" : "14",
+        "linkedRelationshipId" : "13",
+        "sourceId" : "1",
+        "technology" : "HTTP"
+      } ],
+      "tags" : "Element,Person"
+    } ],
+    "softwareSystems" : [ {
+      "containers" : [ {
+        "description" : "Crea y gestiona órdenes",
+        "documentation" : { },
+        "id" : "3",
+        "name" : "Orders Service",
+        "properties" : {
+          "structurizr.dsl.identifier" : "ordersService"
+        },
+        "relationships" : [ {
+          "description" : "Publica OrderCreated / OrderCancelled",
+          "destinationId" : "8",
+          "id" : "20",
+          "sourceId" : "3",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Lee/escribe",
+          "destinationId" : "9",
+          "id" : "25",
+          "sourceId" : "3",
+          "tags" : "Relationship",
+          "technology" : "SQL"
+        } ],
+        "tags" : "Element,Container,microservice",
+        "technology" : "NestJS"
+      }, {
+        "description" : "Reserva y libera stock",
+        "documentation" : { },
+        "id" : "4",
+        "name" : "Inventory Service",
+        "properties" : {
+          "structurizr.dsl.identifier" : "inventoryService"
+        },
+        "relationships" : [ {
+          "description" : "Publica StockReserved / StockReservationFailed",
+          "destinationId" : "8",
+          "id" : "21",
+          "sourceId" : "4",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Lee/escribe",
+          "destinationId" : "10",
+          "id" : "26",
+          "sourceId" : "4",
+          "tags" : "Relationship",
+          "technology" : "SQL"
+        } ],
+        "tags" : "Element,Container,microservice",
+        "technology" : "NestJS"
+      }, {
+        "description" : "Procesa pagos",
+        "documentation" : { },
+        "id" : "5",
+        "name" : "Payment Service",
+        "properties" : {
+          "structurizr.dsl.identifier" : "paymentService"
+        },
+        "relationships" : [ {
+          "description" : "Publica PaymentSucceeded / PaymentFailed",
+          "destinationId" : "8",
+          "id" : "22",
+          "sourceId" : "5",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Lee/escribe",
+          "destinationId" : "11",
+          "id" : "27",
+          "sourceId" : "5",
+          "tags" : "Relationship",
+          "technology" : "SQL"
+        } ],
+        "tags" : "Element,Container,microservice",
+        "technology" : "NestJS"
+      }, {
+        "description" : "Envía notificaciones al cliente",
+        "documentation" : { },
+        "id" : "6",
+        "name" : "Notification Service",
+        "properties" : {
+          "structurizr.dsl.identifier" : "notificationService"
+        },
+        "relationships" : [ {
+          "description" : "Publica NotificationSent",
+          "destinationId" : "8",
+          "id" : "23",
+          "sourceId" : "6",
+          "tags" : "Relationship"
+        } ],
+        "tags" : "Element,Container,microservice",
+        "technology" : "NestJS"
+      }, {
+        "description" : "Coordina la saga orquestada y persiste su estado",
+        "documentation" : { },
+        "id" : "7",
+        "name" : "Saga Orchestrator",
+        "properties" : {
+          "structurizr.dsl.identifier" : "sagaOrchestrator"
+        },
+        "relationships" : [ {
+          "description" : "Comando: crear/cancelar orden",
+          "destinationId" : "3",
+          "id" : "15",
+          "sourceId" : "7",
+          "tags" : "Relationship",
+          "technology" : "RabbitMQ"
+        }, {
+          "description" : "Comando: reservar/liberar stock",
+          "destinationId" : "4",
+          "id" : "16",
+          "sourceId" : "7",
+          "tags" : "Relationship",
+          "technology" : "RabbitMQ"
+        }, {
+          "description" : "Comando: procesar/revertir pago",
+          "destinationId" : "5",
+          "id" : "17",
+          "sourceId" : "7",
+          "tags" : "Relationship",
+          "technology" : "RabbitMQ"
+        }, {
+          "description" : "Comando: notificar resultado",
+          "destinationId" : "6",
+          "id" : "18",
+          "sourceId" : "7",
+          "tags" : "Relationship",
+          "technology" : "RabbitMQ"
+        }, {
+          "description" : "Lee/escribe estado de la saga",
+          "destinationId" : "12",
+          "id" : "19",
+          "sourceId" : "7",
+          "tags" : "Relationship",
+          "technology" : "SQL"
+        }, {
+          "description" : "Consume eventos / publica comandos",
+          "destinationId" : "8",
+          "id" : "24",
+          "sourceId" : "7",
+          "tags" : "Relationship"
+        } ],
+        "tags" : "Element,Container,microservice",
+        "technology" : "NestJS"
+      }, {
+        "description" : "Message broker para eventos y comandos",
+        "documentation" : { },
+        "id" : "8",
+        "name" : "RabbitMQ",
+        "properties" : {
+          "structurizr.dsl.identifier" : "rabbitmq"
+        },
+        "tags" : "Element,Container,broker",
+        "technology" : "RabbitMQ"
+      }, {
+        "description" : "Datos de órdenes",
+        "documentation" : { },
+        "id" : "9",
+        "name" : "Orders DB",
+        "properties" : {
+          "structurizr.dsl.identifier" : "ordersDb"
+        },
+        "tags" : "Element,Container,database",
+        "technology" : "PostgreSQL"
+      }, {
+        "description" : "Datos de stock",
+        "documentation" : { },
+        "id" : "10",
+        "name" : "Inventory DB",
+        "properties" : {
+          "structurizr.dsl.identifier" : "inventoryDb"
+        },
+        "tags" : "Element,Container,database",
+        "technology" : "PostgreSQL"
+      }, {
+        "description" : "Datos de pagos/transacciones",
+        "documentation" : { },
+        "id" : "11",
+        "name" : "Payment DB",
+        "properties" : {
+          "structurizr.dsl.identifier" : "paymentDb"
+        },
+        "tags" : "Element,Container,database",
+        "technology" : "PostgreSQL"
+      }, {
+        "description" : "Estado persistido de cada saga (para resumir tras crash/downtime)",
+        "documentation" : { },
+        "id" : "12",
+        "name" : "Saga State DB",
+        "properties" : {
+          "structurizr.dsl.identifier" : "sagaDb"
+        },
+        "tags" : "Element,Container,database",
+        "technology" : "PostgreSQL"
+      } ],
+      "description" : "Plataforma de e-commerce event-driven",
+      "documentation" : { },
+      "id" : "2",
+      "name" : "OrderFlow",
+      "properties" : {
+        "structurizr.dsl.identifier" : "orderFlow"
+      },
+      "tags" : "Element,Software System"
+    } ]
+  },
+  "name" : "OrderFlow",
+  "properties" : {
+    "structurizr.inspection.error" : "8",
+    "structurizr.dsl" : "d29ya3NwYWNlICJPcmRlckZsb3ciICJTaXN0ZW1hIGRlIGUtY29tbWVyY2UgYmFzYWRvIGVuIGV2ZW50b3MsIG1pY3Jvc2VydmljaW9zIHkgc2FnYSBvcnF1ZXN0YWRhIiB7CgogICAgbW9kZWwgewogICAgICAgIGN1c3RvbWVyID0gcGVyc29uICJDbGllbnRlIiAiQ29tcHJhIHByb2R1Y3RvcyBlbiBsYSB0aWVuZGEiCgogICAgICAgIG9yZGVyRmxvdyA9IHNvZnR3YXJlU3lzdGVtICJPcmRlckZsb3ciICJQbGF0YWZvcm1hIGRlIGUtY29tbWVyY2UgZXZlbnQtZHJpdmVuIiB7CgogICAgICAgICAgICBvcmRlcnNTZXJ2aWNlID0gY29udGFpbmVyICJPcmRlcnMgU2VydmljZSIgIkNyZWEgeSBnZXN0aW9uYSDDs3JkZW5lcyIgIk5lc3RKUyIgIm1pY3Jvc2VydmljZSIKICAgICAgICAgICAgaW52ZW50b3J5U2VydmljZSA9IGNvbnRhaW5lciAiSW52ZW50b3J5IFNlcnZpY2UiICJSZXNlcnZhIHkgbGliZXJhIHN0b2NrIiAiTmVzdEpTIiAibWljcm9zZXJ2aWNlIgogICAgICAgICAgICBwYXltZW50U2VydmljZSA9IGNvbnRhaW5lciAiUGF5bWVudCBTZXJ2aWNlIiAiUHJvY2VzYSBwYWdvcyIgIk5lc3RKUyIgIm1pY3Jvc2VydmljZSIKICAgICAgICAgICAgbm90aWZpY2F0aW9uU2VydmljZSA9IGNvbnRhaW5lciAiTm90aWZpY2F0aW9uIFNlcnZpY2UiICJFbnbDrWEgbm90aWZpY2FjaW9uZXMgYWwgY2xpZW50ZSIgIk5lc3RKUyIgIm1pY3Jvc2VydmljZSIKICAgICAgICAgICAgc2FnYU9yY2hlc3RyYXRvciA9IGNvbnRhaW5lciAiU2FnYSBPcmNoZXN0cmF0b3IiICJDb29yZGluYSBsYSBzYWdhIG9ycXVlc3RhZGEgeSBwZXJzaXN0ZSBzdSBlc3RhZG8iICJOZXN0SlMiICJtaWNyb3NlcnZpY2UiCgogICAgICAgICAgICByYWJiaXRtcSA9IGNvbnRhaW5lciAiUmFiYml0TVEiICJNZXNzYWdlIGJyb2tlciBwYXJhIGV2ZW50b3MgeSBjb21hbmRvcyIgIlJhYmJpdE1RIiAiYnJva2VyIgoKICAgICAgICAgICAgb3JkZXJzRGIgPSBjb250YWluZXIgIk9yZGVycyBEQiIgIkRhdG9zIGRlIMOzcmRlbmVzIiAiUG9zdGdyZVNRTCIgImRhdGFiYXNlIgogICAgICAgICAgICBpbnZlbnRvcnlEYiA9IGNvbnRhaW5lciAiSW52ZW50b3J5IERCIiAiRGF0b3MgZGUgc3RvY2siICJQb3N0Z3JlU1FMIiAiZGF0YWJhc2UiCiAgICAgICAgICAgIHBheW1lbnREYiA9IGNvbnRhaW5lciAiUGF5bWVudCBEQiIgIkRhdG9zIGRlIHBhZ29zL3RyYW5zYWNjaW9uZXMiICJQb3N0Z3JlU1FMIiAiZGF0YWJhc2UiCiAgICAgICAgICAgIHNhZ2FEYiA9IGNvbnRhaW5lciAiU2FnYSBTdGF0ZSBEQiIgIkVzdGFkbyBwZXJzaXN0aWRvIGRlIGNhZGEgc2FnYSAocGFyYSByZXN1bWlyIHRyYXMgY3Jhc2gvZG93bnRpbWUpIiAiUG9zdGdyZVNRTCIgImRhdGFiYXNlIgoKICAgICAgICAgICAgIyBSZWxhY2lvbmVzIGNsaWVudGUgLT4gc2lzdGVtYQogICAgICAgICAgICBjdXN0b21lciAtPiBvcmRlcnNTZXJ2aWNlICJDcmVhIHVuYSBvcmRlbiIgIkhUVFAiCgogICAgICAgICAgICAjIE9ycXVlc3RhZG9yIGNvb3JkaW5hIGNhZGEgcGFzbyBkZSBsYSBzYWdhCiAgICAgICAgICAgIHNhZ2FPcmNoZXN0cmF0b3IgLT4gb3JkZXJzU2VydmljZSAiQ29tYW5kbzogY3JlYXIvY2FuY2VsYXIgb3JkZW4iICJSYWJiaXRNUSIKICAgICAgICAgICAgc2FnYU9yY2hlc3RyYXRvciAtPiBpbnZlbnRvcnlTZXJ2aWNlICJDb21hbmRvOiByZXNlcnZhci9saWJlcmFyIHN0b2NrIiAiUmFiYml0TVEiCiAgICAgICAgICAgIHNhZ2FPcmNoZXN0cmF0b3IgLT4gcGF5bWVudFNlcnZpY2UgIkNvbWFuZG86IHByb2Nlc2FyL3JldmVydGlyIHBhZ28iICJSYWJiaXRNUSIKICAgICAgICAgICAgc2FnYU9yY2hlc3RyYXRvciAtPiBub3RpZmljYXRpb25TZXJ2aWNlICJDb21hbmRvOiBub3RpZmljYXIgcmVzdWx0YWRvIiAiUmFiYml0TVEiCiAgICAgICAgICAgIHNhZ2FPcmNoZXN0cmF0b3IgLT4gc2FnYURiICJMZWUvZXNjcmliZSBlc3RhZG8gZGUgbGEgc2FnYSIgIlNRTCIKCiAgICAgICAgICAgICMgU2VydmljaW9zIHB1YmxpY2FuIGV2ZW50b3MgZGUgdnVlbHRhIGFsIG9ycXVlc3RhZG9yIHbDrWEgZWwgYnJva2VyCiAgICAgICAgICAgIG9yZGVyc1NlcnZpY2UgLT4gcmFiYml0bXEgIlB1YmxpY2EgT3JkZXJDcmVhdGVkIC8gT3JkZXJDYW5jZWxsZWQiCiAgICAgICAgICAgIGludmVudG9yeVNlcnZpY2UgLT4gcmFiYml0bXEgIlB1YmxpY2EgU3RvY2tSZXNlcnZlZCAvIFN0b2NrUmVzZXJ2YXRpb25GYWlsZWQiCiAgICAgICAgICAgIHBheW1lbnRTZXJ2aWNlIC0+IHJhYmJpdG1xICJQdWJsaWNhIFBheW1lbnRTdWNjZWVkZWQgLyBQYXltZW50RmFpbGVkIgogICAgICAgICAgICBub3RpZmljYXRpb25TZXJ2aWNlIC0+IHJhYmJpdG1xICJQdWJsaWNhIE5vdGlmaWNhdGlvblNlbnQiCiAgICAgICAgICAgIHNhZ2FPcmNoZXN0cmF0b3IgLT4gcmFiYml0bXEgIkNvbnN1bWUgZXZlbnRvcyAvIHB1YmxpY2EgY29tYW5kb3MiCgogICAgICAgICAgICAjIENhZGEgc2VydmljaW8gY29uIHN1IHByb3BpYSBiYXNlIGRlIGRhdG9zCiAgICAgICAgICAgIG9yZGVyc1NlcnZpY2UgLT4gb3JkZXJzRGIgIkxlZS9lc2NyaWJlIiAiU1FMIgogICAgICAgICAgICBpbnZlbnRvcnlTZXJ2aWNlIC0+IGludmVudG9yeURiICJMZWUvZXNjcmliZSIgIlNRTCIKICAgICAgICAgICAgcGF5bWVudFNlcnZpY2UgLT4gcGF5bWVudERiICJMZWUvZXNjcmliZSIgIlNRTCIKICAgICAgICB9CiAgICB9CgogICAgdmlld3MgewogICAgICAgIHN5c3RlbUNvbnRleHQgb3JkZXJGbG93ICJDb250ZXh0byIgewogICAgICAgICAgICBpbmNsdWRlICoKICAgICAgICAgICAgYXV0b0xheW91dAogICAgICAgIH0KCiAgICAgICAgY29udGFpbmVyIG9yZGVyRmxvdyAiQ29udGVuZWRvcmVzIiB7CiAgICAgICAgICAgIGluY2x1ZGUgKgogICAgICAgICAgICBhdXRvTGF5b3V0CiAgICAgICAgfQoKICAgICAgICAjIEVqZW1wbG8gZGUgdmlzdGEgZGUgY29tcG9uZW50ZXMsIGNvbXBsZXRhciBjdWFuZG8gZGVmaW5hcwogICAgICAgICMgbG9zIGNvbXBvbmVudGVzIGludGVybm9zIGRlbCBTYWdhIE9yY2hlc3RyYXRvciAoaGFuZGxlciwgcmVwb3NpdG9yaW8sIGV0Yy4pCiAgICAgICAgIyBjb21wb25lbnQgc2FnYU9yY2hlc3RyYXRvciAiQ29tcG9uZW50ZXMtT3JxdWVzdGFkb3IiIHsKICAgICAgICAjICAgICBpbmNsdWRlICoKICAgICAgICAjICAgICBhdXRvTGF5b3V0CiAgICAgICAgIyB9CgogICAgICAgIHN0eWxlcyB7CiAgICAgICAgICAgIGVsZW1lbnQgIm1pY3Jvc2VydmljZSIgewogICAgICAgICAgICAgICAgc2hhcGUgUm91bmRlZEJveAogICAgICAgICAgICAgICAgYmFja2dyb3VuZCAjMTE2OGJkCiAgICAgICAgICAgICAgICBjb2xvciAjZmZmZmZmCiAgICAgICAgICAgIH0KICAgICAgICAgICAgZWxlbWVudCAiYnJva2VyIiB7CiAgICAgICAgICAgICAgICBzaGFwZSBQaXBlCiAgICAgICAgICAgICAgICBiYWNrZ3JvdW5kICNmNTgyMjAKICAgICAgICAgICAgICAgIGNvbG9yICNmZmZmZmYKICAgICAgICAgICAgfQogICAgICAgICAgICBlbGVtZW50ICJkYXRhYmFzZSIgewogICAgICAgICAgICAgICAgc2hhcGUgQ3lsaW5kZXIKICAgICAgICAgICAgICAgIGJhY2tncm91bmQgIzZjNzU3ZAogICAgICAgICAgICAgICAgY29sb3IgI2ZmZmZmZgogICAgICAgICAgICB9CiAgICAgICAgfQogICAgfQoKfQo=",
+    "structurizr.inspection.info" : "0",
+    "structurizr.inspection.ignore" : "0",
+    "structurizr.inspection.warning" : "0"
+  },
+  "views" : {
+    "configuration" : {
+      "styles" : {
+        "elements" : [ {
+          "background" : "#f58220",
+          "color" : "#ffffff",
+          "shape" : "Pipe",
+          "tag" : "broker"
+        }, {
+          "background" : "#6c757d",
+          "color" : "#ffffff",
+          "shape" : "Cylinder",
+          "tag" : "database"
+        }, {
+          "background" : "#1168bd",
+          "color" : "#ffffff",
+          "shape" : "RoundedBox",
+          "tag" : "microservice"
+        } ]
+      },
+      "terminology" : { }
+    },
+    "containerViews" : [ {
+      "automaticLayout" : {
+        "edgeSeparation" : 50,
+        "nodeSeparation" : 50,
+        "rankDirection" : "LeftRight",
+        "rankSeparation" : 100,
+        "vertices" : true
+      },
+      "elements" : [ {
+        "id" : "1",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "3",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "4",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "5",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "6",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "7",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "8",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "9",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "10",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "11",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "12",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "externalSoftwareSystemBoundariesVisible" : false,
+      "key" : "Contenedores",
+      "name" : "Container View: OrderFlow",
+      "order" : 2,
+      "relationships" : [ {
+        "id" : "13"
+      }, {
+        "id" : "15"
+      }, {
+        "id" : "16"
+      }, {
+        "id" : "17"
+      }, {
+        "id" : "18"
+      }, {
+        "id" : "19"
+      }, {
+        "id" : "20"
+      }, {
+        "id" : "21"
+      }, {
+        "id" : "22"
+      }, {
+        "id" : "23"
+      }, {
+        "id" : "24"
+      }, {
+        "id" : "25"
+      }, {
+        "id" : "26"
+      }, {
+        "id" : "27"
+      } ],
+      "softwareSystemId" : "2"
+    } ],
+    "systemContextViews" : [ {
+      "automaticLayout" : {
+        "edgeSeparation" : 50,
+        "nodeSeparation" : 50,
+        "rankDirection" : "LeftRight",
+        "rankSeparation" : 100,
+        "vertices" : true
+      },
+      "elements" : [ {
+        "id" : "1",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "2",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "enterpriseBoundaryVisible" : true,
+      "key" : "Contexto",
+      "name" : "System Context View: OrderFlow",
+      "order" : 1,
+      "relationships" : [ {
+        "id" : "14"
+      } ],
+      "softwareSystemId" : "2"
+    } ]
+  }
+}
