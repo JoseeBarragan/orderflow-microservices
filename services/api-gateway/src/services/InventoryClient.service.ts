@@ -4,20 +4,22 @@ import { Observable } from "rxjs";
 
 export interface ProductResponse {
   id: string;
-  name: string; 
+  name: string;
   unitPriceCents: number;
   available_stock: number;
 }
 
 interface InventoryClientService {
-  getAll(data: { limit: number, offset: number }): Observable<ProductResponse>;
+  getAll(data: { limit: number; offset: number }): Observable<ProductResponse[]>;
 }
 
 @Injectable()
 export class InventoryGatewayService implements OnModuleInit {
   private inventoryClientService: InventoryClientService;
 
-  constructor(@Inject("INVENTORY_PACKAGE") private readonly client: ClientGrpc) {}
+  constructor(
+    @Inject("INVENTORY_PACKAGE") private readonly client: ClientGrpc,
+  ) {}
 
   onModuleInit() {
     this.inventoryClientService =

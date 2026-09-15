@@ -22,7 +22,7 @@ const protoPath = (service: string) =>  {return join(__dirname, `proto/${service
         options: {
           package: "inventory",
           protoPath: protoPath("inventory"),
-          url: "localhost:5005"
+          url: process.env.INVENTORY_URL || "localhost:5005",
         },
       },
       {
@@ -31,7 +31,7 @@ const protoPath = (service: string) =>  {return join(__dirname, `proto/${service
         options: { 
           package: "order",
           protoPath: protoPath("order"),
-          url: "localhost:5006"
+          url: process.env.ORDER_URL || "localhost:5006" 
         },
       },
       {
@@ -40,7 +40,7 @@ const protoPath = (service: string) =>  {return join(__dirname, `proto/${service
         options: {
           package: "payment",
           protoPath: protoPath("payment"),
-          url: "localhost:5007"
+          url: process.env.PAYMENT_URL || "localhost:5007"
         }
       }
     ]),

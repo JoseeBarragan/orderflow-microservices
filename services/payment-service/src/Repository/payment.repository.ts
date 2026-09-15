@@ -1,5 +1,5 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { Prisma } from "../../generated/prisma/client";
+import { Prisma } from "@prisma/client";
 import { PrismaService } from "../prisma.service";
 import { PaymentNotFoundError } from "../types/Error.type.js";
 

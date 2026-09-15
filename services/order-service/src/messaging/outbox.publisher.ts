@@ -2,6 +2,7 @@ import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
 import { ClientProxy } from "@nestjs/microservices";
 import { OutboxRepository } from "../Repository/outbox.repository";
 import { OutboxEventType } from "../types/order.entity";
+import { firstValueFrom } from "rxjs";
 
 @Injectable()
 export class OutboxPublisher implements OnModuleInit {
@@ -28,7 +29,7 @@ export class OutboxPublisher implements OnModuleInit {
       }
 
       try {
-        this.client.emit(msg.eventType, msg.payload);
+        await firstValueFrom(this.client.emit(msg.eventType, msg.payload));
         await this.outboxRepository.updateMessagePublish(msg.id, true);
       } catch (err) {
         console.error(`Error publicando mensaje ${msg.id}: ${err}`);

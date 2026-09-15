@@ -3,6 +3,10 @@ services:
     build:
       context: ./services/api-gateway
       dockerfile: dockerfile
+    environment:
+      - INVENTORY_URL=inventory:5005
+      - ORDER_URL=order:5006
+      - PAYMENT_URL=payment:5007
     ports:
       - "3000:3000"
 
@@ -10,38 +14,43 @@ services:
     build: 
       context: ./services/inventory-service
       dockerfile: dockerfile
+      args:
+        - DATABASE_URL=postgresql://inventory-user:inventory-pass@inventory-db:5432/inventory-db
     env_file:
       - ./services/inventory-service/.env
     depends_on:
-      - inventory-db
-      - rabbitmq
+      inventory-db:
+        condition: service_healthy
+      rabbitmq: 
+        condition: service_healthy
   
-  notification:
-    build: 
-      context: ./services/notification-service
-      dockerfile: dockerfile
-    depends_on:
-      - rabbitmq
-
   order: 
     build: 
       context: ./services/order-service
       dockerfile: dockerfile
+      args:
+        - DATABASE_URL=postgresql://orders_user:orders_pass@orders-db:5432/orders_db
     env_file:
       - ./services/order-service/.env
     depends_on:
-      - rabbitmq
-      - orders-db
+      rabbitmq:
+        condition: service_healthy
+      orders-db:
+        condition: service_healthy
 
   payment:
     build: 
       context: ./services/payment-service
       dockerfile: dockerfile
+      args:
+        - DATABASE_URL=postgresql://payment_user:payment_pass@payment-db:5432/payment_db
     env_file: 
       - ./services/payment-service/.env
     depends_on:
-      - rabbitmq
-      - payment-db
+      rabbitmq: 
+        condition: service_healthy
+      payment-db: 
+        condition: service_healthy
 
   rabbitmq:
     image: rabbitmq:3.13-management
@@ -97,7 +106,7 @@ services:
     volumes:
       - payment_db_data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U orders_user -d orders_db']
+      test: ['CMD-SHELL', 'pg_isready -U payment_user -d payment_db']
       interval: 5s
       timeout: 5s
       retries: 5
