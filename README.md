@@ -26,6 +26,31 @@ A simplified e-commerce system built with event-driven microservices in NestJS. 
 
 Each service has its own Postgres database (no service queries another service's DB directly) and talks to the others exclusively through events.
 
+## ☁️ Cloud Infrastructure
+
+This project is deployed on **Amazon Web Services (AWS)** using a cost-optimized architecture designed to maximize the use of the Free Tier while maintaining strict security best practices.
+
+![AWS Architecture Diagram](./models/aws-infra-model.png)
+
+### 🏗️ Key Design Decisions
+
+My infrastructure choices prioritize cost-efficiency without compromising the foundational security of the application:
+
+* **Cost-Optimized Compute (Bypassing ALB):** To avoid the high baseline costs of an Application Load Balancer (ALB), the backend is hosted on a single **EC2 instance** within a **Public Subnet**. It is protected by strict Security Groups that only allow HTTP/HTTPS traffic from the internet and SSH access strictly from a whitelisted developer IP.
+* **Secure Data Layer:** The **RDS** database resides in a **Private Subnet**. It has no direct internet access and only accepts incoming connections originating from the backend EC2 Security Group.
+* **Serverless Frontend:** The frontend application is hosted as static assets in an **S3 Bucket** and distributed globally via **CloudFront** (CDN), providing low-latency access, DDoS protection via **AWS Shield Standard**, and out-of-the-box HTTPS.
+* **Zero-Cost Secrets Management:** Instead of hardcoding `.env` variables or using the paid AWS Secrets Manager, i inject credentials securely at runtime using **SSM Parameter Store** (Standard Tier).
+* **Observability & CI/CD:** Application logs and infrastructure metrics (EC2/RDS) are centralized using **CloudWatch**. Deployments are automated through **AWS CodePipeline**, pushing frontend updates to S3 and backend changes to EC2.
+
+### 🚀 A Note on Scalability vs. Cost
+
+*Architecture is always a trade-off.* This current design is heavily constrained by AWS Free Tier limits and a strict zero-cost budget. 
+
+If infinite scalability and high availability were the primary focus (and budget was not a constraint), this architecture would evolve into:
+1. Moving the EC2 instance to a Private Subnet behind an **Application Load Balancer (ALB)** with an Auto Scaling Group across multiple Availability Zones.
+2. Refactoring the backend to a fully Serverless approach using **API Gateway** and **AWS Lambda** for true scale-to-zero capabilities. 
+3. Utilizing **Amazon Cognito** for managed user authentication and identity management.
+
 ## Services
 
 ### api-gateway
