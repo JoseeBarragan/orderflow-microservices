@@ -298,4 +298,92 @@ describe("InventoryRepository", () => {
       expect(errorSpy).toHaveBeenCalled();
     });
   });
+  describe("consumeStock", () => {
+    const buildTx = (): TxMock => ({
+      products: { updateMany: jest.fn(), update: jest.fn() },
+      stock_reservations: {
+        createMany: jest.fn(),
+        findMany: jest.fn(),
+        update: jest.fn(),
+        updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+      },
+      outbox_events: { create: jest.fn() },
+    });
+
+    const reservation = {
+      id: "r1",
+      order_id: "o1",
+      product_id: "p1",
+      quantity: 2,
+      released: false,
+    };
+
+    it("baja reserved_stock de las reservas activas de la orden", async () => {
+      const tx = buildTx();
+      tx.stock_reservations.findMany.mockResolvedValue([reservation]);
+      prisma.$transaction.mockImplementation(
+        async (cb: (tx: TxMock) => Promise<unknown>) => cb(tx),
+      );
+
+      await repository.consumeStock("o1");
+
+      expect(tx.stock_reservations.findMany).toHaveBeenCalledWith({
+        where: { order_id: "o1", released: false },
+      });
+      expect(tx.products.update).toHaveBeenCalledWith({
+        where: { id: "p1", available_stock: { gte: 0 } },
+        data: { reserved_stock: { decrement: 2 } },
+      });
+    });
+
+    it("NO repone available_stock porque la unidad ya se vendio", async () => {
+      const tx = buildTx();
+      tx.stock_reservations.findMany.mockResolvedValue([reservation]);
+      prisma.$transaction.mockImplementation(
+        async (cb: (tx: TxMock) => Promise<unknown>) => cb(tx),
+      );
+
+      await repository.consumeStock("o1");
+
+      const [updateArg] = tx.products.update.mock.calls[0] as [
+        { data: Record<string, unknown> },
+      ];
+      expect(updateArg.data).not.toHaveProperty("available_stock");
+    });
+
+    it("es idempotente ante una redelivery: la reserva ya cerrada se omite", async () => {
+      const tx = buildTx();
+      tx.stock_reservations.findMany.mockResolvedValue([reservation]);
+      tx.stock_reservations.updateMany.mockResolvedValue({ count: 0 });
+      prisma.$transaction.mockImplementation(
+        async (cb: (tx: TxMock) => Promise<unknown>) => cb(tx),
+      );
+
+      await repository.consumeStock("o1");
+
+      expect(tx.products.update).not.toHaveBeenCalled();
+    });
+
+    it("no toca nada cuando la orden no tiene reservas activas", async () => {
+      const tx = buildTx();
+      tx.stock_reservations.findMany.mockResolvedValue([]);
+      prisma.$transaction.mockImplementation(
+        async (cb: (tx: TxMock) => Promise<unknown>) => cb(tx),
+      );
+
+      await repository.consumeStock("o1");
+
+      expect(tx.stock_reservations.updateMany).not.toHaveBeenCalled();
+      expect(tx.products.update).not.toHaveBeenCalled();
+    });
+
+    it("loguea y propaga el error cuando la transaccion falla", async () => {
+      prisma.$transaction.mockRejectedValue(new Error("db down"));
+
+      await expect(repository.consumeStock("o1")).rejects.toMatchObject({
+        error: { code: 13 },
+      });
+      expect(errorSpy).toHaveBeenCalled();
+    });
+  });
 });

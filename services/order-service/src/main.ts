@@ -21,8 +21,8 @@ async function bootstrap() {
       urls: [process.env.RABBITMQ_URL || "amqp://localhost:5672"],
       exchange: "orderflow.events",
       exchangeType: "topic",
-      queue: "order-service.stock.queue",
-      routingKey: "stock.*",
+      queue: "order-service.stock-reject.queue",
+      routingKey: "stock.reject",
       queueOptions: { durable: true },
     },
   });
@@ -33,11 +33,13 @@ async function bootstrap() {
       urls: [process.env.RABBITMQ_URL || "amqp://localhost:5672"],
       exchange: "orderflow.events",
       exchangeType: "topic",
-      queue: "order-service.payment-failed.queue",
-      routingKey: "payment.failed",
+      queue: "order-service.payment.queue",
+      routingKey: "payment.*",
       queueOptions: { durable: true },
     },
   });
+
+  app.enableShutdownHooks();
 
   await app.startAllMicroservices();
   await app.init();

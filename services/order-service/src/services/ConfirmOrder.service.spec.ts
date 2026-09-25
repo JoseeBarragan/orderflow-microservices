@@ -1,15 +1,15 @@
 import { Test, TestingModule } from "@nestjs/testing";
-import { CancelOrderService } from "./CancelOrder.service";
+import { ConfirmOrderService } from "./ConfirmOrder.service";
 import { OrderRepository } from "../Repository/order.repository";
 
-describe("CancelOrderService", () => {
-  let service: CancelOrderService;
+describe("ConfirmOrderService", () => {
+  let service: ConfirmOrderService;
   let orderRepository: { updateStatusIfPending: jest.Mock };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        CancelOrderService,
+        ConfirmOrderService,
         {
           provide: OrderRepository,
           useValue: { updateStatusIfPending: jest.fn() },
@@ -17,14 +17,14 @@ describe("CancelOrderService", () => {
       ],
     }).compile();
 
-    service = module.get<CancelOrderService>(CancelOrderService);
+    service = module.get<ConfirmOrderService>(ConfirmOrderService);
     orderRepository = module.get<{ updateStatusIfPending: jest.Mock }>(
       OrderRepository,
     );
   });
 
   describe("execute", () => {
-    it("cancela la orden pideciendo la transición solo si está PENDING", async () => {
+    it("confirma la orden pidiendo la transición solo si está PENDING", async () => {
       orderRepository.updateStatusIfPending.mockResolvedValue(true);
 
       const result = await service.execute("o1");
@@ -32,12 +32,12 @@ describe("CancelOrderService", () => {
       expect(result).toBe(true);
       expect(orderRepository.updateStatusIfPending).toHaveBeenCalledWith(
         "o1",
-        "CANCELLED",
+        "CONFIRMED",
       );
       expect(orderRepository.updateStatusIfPending).toHaveBeenCalledTimes(1);
     });
 
-    it("propaga el false cuando la orden ya estaba en un estado terminal", async () => {
+    it("propaga el false cuando la orden ya estaba cancelada", async () => {
       orderRepository.updateStatusIfPending.mockResolvedValue(false);
 
       const result = await service.execute("o1");

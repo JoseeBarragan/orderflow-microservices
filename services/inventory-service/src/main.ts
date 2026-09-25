@@ -39,6 +39,30 @@ async function bootstrap() {
     },
   });
 
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.RMQ,
+    options: {
+      urls: [process.env.RABBITMQ_URL || "amqp://localhost:5672"],
+      exchange: "orderflow.events",
+      exchangeType: "topic",
+      queue: "inventory-service.order-cancelled.queue",
+      routingKey: "order.cancelled",
+      queueOptions: { durable: true },
+    },
+  });
+
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.RMQ,
+    options: {
+      urls: [process.env.RABBITMQ_URL || "amqp://localhost:5672"],
+      exchange: "orderflow.events",
+      exchangeType: "topic",
+      queue: "inventory-service.payment-approved.queue",
+      routingKey: "payment.approved",
+      queueOptions: { durable: true },
+    },
+  });
+
   await app.startAllMicroservices();
   await app.init();
 }

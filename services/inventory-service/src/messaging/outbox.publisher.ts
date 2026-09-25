@@ -1,13 +1,17 @@
-import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
+import {
+  Inject,
+  Injectable,
+  OnModuleDestroy,
+  OnModuleInit,
+} from "@nestjs/common";
 import { ClientProxy } from "@nestjs/microservices";
 import { OutboxRepository } from "../Repository/Outbox.repository";
 import { OutboxEventType } from "../types/Inventory.types";
 import { firstValueFrom } from "rxjs";
 
 @Injectable()
-export class OutboxPublisher implements OnModuleInit {
-  private timer: NodeJS.Timeout | null = null;
-  private running = false;
+export class OutboxPublisher implements OnModuleInit, OnModuleDestroy {
+  private timer: ReturnType<typeof setInterval>;
 
   constructor(
     private readonly outboxRepository: OutboxRepository,
@@ -16,21 +20,17 @@ export class OutboxPublisher implements OnModuleInit {
 
   onModuleInit() {
     this.timer = setInterval(() => {
-      void this.publishPending();
+      void this.publishPending().catch((err) =>
+        console.error(`Error consultando el outbox: ${err}`),
+      );
     }, 1000);
   }
 
   onModuleDestroy() {
-    if (this.timer) {
-      clearInterval(this.timer);
-      this.timer = null;
-    }
+    clearInterval(this.timer);
   }
 
   private async publishPending(): Promise<void> {
-    if (this.running) return;
-    this.running = true;
-
     const messages = await this.outboxRepository.getPendingMessage();
 
     if (messages.length === 0) return;
@@ -45,8 +45,6 @@ export class OutboxPublisher implements OnModuleInit {
         await this.outboxRepository.updateMessagePublish(msg.id, true);
       } catch (err) {
         console.error(`Error publicando mensaje ${msg.id}: ${err}`);
-      } finally {
-        this.running = false;
       }
     }
   }

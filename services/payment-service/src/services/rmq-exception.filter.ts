@@ -6,11 +6,17 @@ import { RpcException } from "@nestjs/microservices";
 export class RmqExceptionFilter implements RpcExceptionFilter<RpcException> {
   private readonly logger = new Logger(RmqExceptionFilter.name);
 
-  catch(exception: RpcException): Observable<any> {
+  catch(exception: unknown): Observable<any> {
+    const message =
+      exception instanceof Error ? exception.message : String(exception);
+
     this.logger.error(
-      `Error procesando evento: ${exception?.message}`,
-      exception?.stack,
+      `Error procesando evento: ${message}`,
+      exception instanceof Error ? exception.stack : undefined,
     );
-    return throwError(() => exception.getError());
+    const error =
+      exception instanceof RpcException ? exception.getError() : exception;
+
+    return throwError(() => error);
   }
 }

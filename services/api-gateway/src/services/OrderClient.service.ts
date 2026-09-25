@@ -11,6 +11,7 @@ type OrderItems = {
 
 type Order = {
   orderId: string;
+  status: string;
   totalAmount: number;
   items: OrderItems[];
 };

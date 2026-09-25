@@ -1,12 +1,12 @@
 import { Test, TestingModule } from "@nestjs/testing";
-import { of } from "rxjs";
+import { of, throwError } from "rxjs";
 import { OutboxPublisher } from "./outbox.publisher";
 import { OutboxRepository } from "../Repository/outbox.repository";
 
 describe("OutboxPublisher", () => {
   let publisher: OutboxPublisher;
   let outboxRepository: {
-    getPendingMessage: jest.Mock;
+    getPendingMessages: jest.Mock;
     updateMessagePublish: jest.Mock;
   };
   let client: { emit: jest.Mock };
@@ -16,10 +16,9 @@ describe("OutboxPublisher", () => {
     jest.useFakeTimers();
 
     outboxRepository = {
-      getPendingMessage: jest.fn(),
+      getPendingMessages: jest.fn(),
       updateMessagePublish: jest.fn(),
     };
-
     client = { emit: jest.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -35,53 +34,55 @@ describe("OutboxPublisher", () => {
   });
 
   afterEach(() => {
-    errorSpy.mockRestore();
+    jest.restoreAllMocks();
     jest.useRealTimers();
     jest.clearAllTimers();
   });
 
   it("no emite nada cuando no hay mensajes pendientes", async () => {
-    outboxRepository.getPendingMessage.mockResolvedValue([]);
+    outboxRepository.getPendingMessages.mockResolvedValue([]);
 
     publisher.onModuleInit();
-
     await jest.advanceTimersByTimeAsync(1000);
 
-    expect(outboxRepository.getPendingMessage).toHaveBeenCalled();
+    expect(outboxRepository.getPendingMessages).toHaveBeenCalled();
     expect(client.emit).not.toHaveBeenCalled();
     expect(outboxRepository.updateMessagePublish).not.toHaveBeenCalled();
   });
 
-  it("emite con la routing key 'order.created' y marca el mensaje como publicado", async () => {
-    const payload = {
-      orderId: "order-1",
-      items: [{ productId: "p1", quantity: 2, unitPrice: 1500 }],
-      totalAmount: 3000,
-    };
-    outboxRepository.getPendingMessage.mockResolvedValue([
-      { id: "ev-1", eventType: "order.created", payload },
+  it("emite payment.approved y payment.failed y los marca como publicados", async () => {
+    outboxRepository.getPendingMessages.mockResolvedValue([
+      { id: "ev-1", eventType: "payment.approved", payload: { orderId: "o1" } },
+      { id: "ev-2", eventType: "payment.failed", payload: { orderId: "o2" } },
     ]);
     outboxRepository.updateMessagePublish.mockResolvedValue(undefined);
-    client.emit.mockReturnValue(of(payload));
+    client.emit.mockReturnValue(of(1));
 
     publisher.onModuleInit();
-
     await jest.advanceTimersByTimeAsync(1000);
 
-    expect(client.emit).toHaveBeenCalledWith("order.created", payload);
+    expect(client.emit).toHaveBeenNthCalledWith(1, "payment.approved", {
+      orderId: "o1",
+    });
+    expect(client.emit).toHaveBeenNthCalledWith(2, "payment.failed", {
+      orderId: "o2",
+    });
     expect(outboxRepository.updateMessagePublish).toHaveBeenCalledWith(
       "ev-1",
+      true,
+    );
+    expect(outboxRepository.updateMessagePublish).toHaveBeenCalledWith(
+      "ev-2",
       true,
     );
   });
 
   it("ignora y loguea los eventos con eventType desconocido", async () => {
-    outboxRepository.getPendingMessage.mockResolvedValue([
+    outboxRepository.getPendingMessages.mockResolvedValue([
       { id: "ev-x", eventType: "UnknownType", payload: {} },
     ]);
 
     publisher.onModuleInit();
-
     await jest.advanceTimersByTimeAsync(1000);
 
     expect(errorSpy).toHaveBeenCalled();
@@ -89,37 +90,36 @@ describe("OutboxPublisher", () => {
     expect(outboxRepository.updateMessagePublish).not.toHaveBeenCalled();
   });
 
-  it("continúa procesando aunque falle al publicar o marcar un mensaje", async () => {
-    const payloadOk = { orderId: "order-ok" };
-    outboxRepository.getPendingMessage.mockResolvedValue([
+  it("no marca como publicado un mensaje cuya emisión falla y sigue con el siguiente", async () => {
+    outboxRepository.getPendingMessages.mockResolvedValue([
       {
         id: "ev-fail",
-        eventType: "order.created",
-        payload: { orderId: "fail" },
+        eventType: "payment.approved",
+        payload: { orderId: "a" },
       },
-      { id: "ev-ok", eventType: "order.created", payload: payloadOk },
+      { id: "ev-ok", eventType: "payment.approved", payload: { orderId: "b" } },
     ]);
-    outboxRepository.updateMessagePublish
-      .mockRejectedValueOnce(new Error("update failed"))
-      .mockResolvedValueOnce(undefined);
-    client.emit.mockImplementation((_eventType: string, payload: unknown) =>
-      of(payload),
-    );
+    outboxRepository.updateMessagePublish.mockResolvedValue(undefined);
+    client.emit
+      .mockReturnValueOnce(throwError(() => new Error("broker caido")))
+      .mockReturnValueOnce(of(1));
 
     publisher.onModuleInit();
-
     await jest.advanceTimersByTimeAsync(1000);
 
     expect(client.emit).toHaveBeenCalledTimes(2);
-    expect(outboxRepository.updateMessagePublish).toHaveBeenCalledTimes(2);
+    expect(outboxRepository.updateMessagePublish).toHaveBeenCalledTimes(1);
+    expect(outboxRepository.updateMessagePublish).toHaveBeenCalledWith(
+      "ev-ok",
+      true,
+    );
     expect(errorSpy).toHaveBeenCalled();
   });
 
   it("no deja la promesa sin manejar cuando la consulta al outbox falla", async () => {
-    outboxRepository.getPendingMessage.mockRejectedValue(new Error("db down"));
+    outboxRepository.getPendingMessages.mockRejectedValue(new Error("db down"));
 
     publisher.onModuleInit();
-
     await jest.advanceTimersByTimeAsync(1000);
 
     expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining("db down"));
@@ -127,33 +127,16 @@ describe("OutboxPublisher", () => {
   });
 
   it("deja de consultar al outbox después de onModuleDestroy", async () => {
-    outboxRepository.getPendingMessage.mockResolvedValue([]);
+    outboxRepository.getPendingMessages.mockResolvedValue([]);
 
     publisher.onModuleInit();
     await jest.advanceTimersByTimeAsync(1000);
-    expect(outboxRepository.getPendingMessage).toHaveBeenCalledTimes(1);
+    expect(outboxRepository.getPendingMessages).toHaveBeenCalledTimes(1);
 
     publisher.onModuleDestroy();
     await jest.advanceTimersByTimeAsync(5000);
 
-    expect(outboxRepository.getPendingMessage).toHaveBeenCalledTimes(1);
+    expect(outboxRepository.getPendingMessages).toHaveBeenCalledTimes(1);
     expect(jest.getTimerCount()).toBe(0);
-  });
-  it("emite con la routing key 'order.cancelled'", async () => {
-    const payload = { orderId: "o1" };
-    outboxRepository.getPendingMessage.mockResolvedValue([
-      { id: "ev-2", eventType: "order.cancelled", payload },
-    ]);
-    client.emit.mockReturnValue(of(payload));
-    outboxRepository.updateMessagePublish.mockResolvedValue(undefined);
-
-    publisher.onModuleInit();
-    await jest.advanceTimersByTimeAsync(1000);
-
-    expect(client.emit).toHaveBeenCalledWith("order.cancelled", payload);
-    expect(outboxRepository.updateMessagePublish).toHaveBeenCalledWith(
-      "ev-2",
-      true,
-    );
   });
 });

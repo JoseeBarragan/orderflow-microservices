@@ -3,7 +3,10 @@ import { status } from "@grpc/grpc-js";
 import { Test, TestingModule } from "@nestjs/testing";
 import { ConfirmPaymentService } from "./ConfirmPayment.service";
 import { PaymentRepository } from "../Repository/payment.repository";
-import { PaymentNotFoundError } from "../types/Error.type";
+import {
+  PaymentAlreadySettledError,
+  PaymentNotFoundError,
+} from "../types/Error.type";
 
 describe("ConfirmPaymentService", () => {
   let service: ConfirmPaymentService;
@@ -71,6 +74,21 @@ describe("ConfirmPaymentService", () => {
         error: {
           code: status.NOT_FOUND,
           message: "Payment para la orden o1 no encontrado",
+        },
+      });
+    });
+
+    it("lanza RpcException ABORTED cuando el pago ya fue procesado", async () => {
+      paymentRepository.confirmPayment.mockRejectedValue(
+        new PaymentAlreadySettledError("o1", "FAILED"),
+      );
+
+      await expect(service.execute("o1")).rejects.toBeInstanceOf(RpcException);
+      await expect(service.execute("o1")).rejects.toMatchObject({
+        error: {
+          code: status.ABORTED,
+          message:
+            "El pago de la orden o1 ya fue procesado y está en estado FAILED, no se puede confirmar de nuevo",
         },
       });
     });

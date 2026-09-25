@@ -24,6 +24,7 @@ message Order {
   string orderId = 1;
   int32 totalAmount = 2;
   repeated OrderItems items = 3;
+  string status = 4;
 }
 
 message ManyItems {

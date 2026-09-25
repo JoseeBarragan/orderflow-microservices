@@ -1,22 +1,35 @@
-import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
+import {
+  Inject,
+  Injectable,
+  OnModuleDestroy,
+  OnModuleInit,
+} from "@nestjs/common";
 import { OutboxRepository } from "../Repository/outbox.repository";
 import { ClientProxy } from "@nestjs/microservices";
 import { firstValueFrom } from "rxjs";
 
 @Injectable()
-export class OutboxPublisher implements OnModuleInit {
+export class OutboxPublisher implements OnModuleInit, OnModuleDestroy {
+  private timer: ReturnType<typeof setInterval>;
+
   constructor(
     private readonly outboxRepository: OutboxRepository,
     @Inject("RMQ_CLIENT") private readonly client: ClientProxy,
   ) {}
 
   onModuleInit() {
-    setInterval(() => {
-      void this.PublishPending();
+    this.timer = setInterval(() => {
+      void this.PublishPending().catch((err) =>
+        console.error(`Error consultando el outbox: ${err}`),
+      );
     }, 1000);
   }
 
-  async PublishPending() {
+  onModuleDestroy() {
+    clearInterval(this.timer);
+  }
+
+  async PublishPending(): Promise<void> {
     const messages = await this.outboxRepository.getPendingMessages();
 
     if (messages.length === 0) return;

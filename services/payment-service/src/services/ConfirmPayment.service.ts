@@ -2,7 +2,10 @@ import { Injectable } from "@nestjs/common";
 import { RpcException } from "@nestjs/microservices";
 import { PaymentRepository } from "../Repository/payment.repository";
 import { status } from "@grpc/grpc-js";
-import { PaymentNotFoundError } from "../types/Error.type";
+import {
+  PaymentAlreadySettledError,
+  PaymentNotFoundError,
+} from "../types/Error.type";
 
 @Injectable()
 export class ConfirmPaymentService {
@@ -27,6 +30,12 @@ export class ConfirmPaymentService {
       if (err instanceof PaymentNotFoundError) {
         throw new RpcException({
           code: status.NOT_FOUND,
+          message: err.message,
+        });
+      }
+      if (err instanceof PaymentAlreadySettledError) {
+        throw new RpcException({
+          code: status.ABORTED,
           message: err.message,
         });
       }
