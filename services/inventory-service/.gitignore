@@ -37,6 +37,9 @@ lerna-debug.log*
 
 # dotenv environment variable files
 .env
+
+# Auditoría QA (tracking local)
+PENDIENTES.md
 .env.development.local
 .env.test.local
 .env.production.local

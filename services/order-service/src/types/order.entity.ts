@@ -11,7 +11,7 @@ export type OrderItemsWithOutId = {
 
 export type OrderStatus = "PENDING" | "CONFIRMED" | "CANCELLED";
 
-export type OutboxEventType = "worder.createdw";
+export type OutboxEventType = "order.created";
 
 export interface NewOrder {
   orderId: string;

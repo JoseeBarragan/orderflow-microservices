@@ -1,9 +1,4 @@
-import {
-  Catch,
-  RpcExceptionFilter,
-  ArgumentsHost,
-  Logger,
-} from "@nestjs/common";
+import { Catch, RpcExceptionFilter, Logger } from "@nestjs/common";
 import { Observable, throwError } from "rxjs";
 import { RpcException } from "@nestjs/microservices";
 
@@ -11,7 +6,7 @@ import { RpcException } from "@nestjs/microservices";
 export class GrpcExceptionFilter implements RpcExceptionFilter<RpcException> {
   private readonly logger = new Logger(GrpcExceptionFilter.name);
 
-  catch(exception: RpcException, host: ArgumentsHost): Observable<any> {
+  catch(exception: RpcException): Observable<any> {
     this.logger.error(`Error en gRPC: ${JSON.stringify(exception.getError())}`);
     return throwError(() => exception.getError());
   }

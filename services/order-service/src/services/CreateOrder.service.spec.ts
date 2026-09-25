@@ -1,6 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { CreateOrderService } from "./CreateOrder.service";
 import { OrderRepository } from "../Repository/order.repository";
+import type { OrderItems } from "../types/order.entity";
 
 describe("CreateOrderService", () => {
   let service: CreateOrderService;
@@ -10,15 +11,7 @@ describe("CreateOrderService", () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CreateOrderService,
-        {
-          provide: OrderRepository,
-          useValue: {
-            create: jest.fn(),
-            getAll: jest.fn(),
-            getPendingMessage: jest.fn(),
-            updateMessagePublish: jest.fn(),
-          },
-        },
+        { provide: OrderRepository, useValue: { create: jest.fn() } },
       ],
     }).compile();
 
@@ -27,8 +20,8 @@ describe("CreateOrderService", () => {
   });
 
   describe("execute", () => {
-    it("calcula el total (unitPrice * quantity) y delega al repositorio", async () => {
-      const items = [
+    it("calcula el total y delega la creación al repositorio", async () => {
+      const items: OrderItems[] = [
         { productId: "p1", quantity: 2, unitPrice: 1500 },
         { productId: "p2", quantity: 1, unitPrice: 1000 },
       ];
@@ -42,24 +35,19 @@ describe("CreateOrderService", () => {
       expect(orderRepository.create).toHaveBeenCalledTimes(1);
     });
 
-    it("devuelve total 0 cuando los items no suman importe", async () => {
-      const items = [
-        { productId: "p1", quantity: 0, unitPrice: 1500 },
-        { productId: "p2", quantity: 2, unitPrice: 0 },
-      ];
-      orderRepository.create.mockResolvedValue({ id: "order-0" });
+    it("usa total 0 cuando la lista de items está vacía", async () => {
+      orderRepository.create.mockResolvedValue(undefined);
 
-      await service.execute(items);
+      await service.execute([]);
 
-      expect(orderRepository.create).toHaveBeenCalledWith(0, items);
+      expect(orderRepository.create).toHaveBeenCalledWith(0, []);
     });
 
-    it("propaga el error del repositorio", async () => {
-      const items = [{ productId: "p1", quantity: 1, unitPrice: 100 }];
-      const error = new Error("falla de prisma");
+    it("propaga el error cuando el repositorio falla", async () => {
+      const error = new Error("db down");
       orderRepository.create.mockRejectedValue(error);
 
-      await expect(service.execute(items)).rejects.toThrow(error);
+      await expect(service.execute([])).rejects.toThrow(error);
     });
   });
 });

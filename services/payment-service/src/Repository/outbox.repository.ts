@@ -22,11 +22,11 @@ export class OutboxRepository {
     }
   }
 
-  async updateMessagePublish(id: string, Published: boolean) {
+  async updateMessagePublish(id: string, published: boolean) {
     try {
       return await this.prisma.outboxEvent.update({
         where: { id: id },
-        data: { published: Published, publishedAt: new Date() },
+        data: { published, publishedAt: new Date() },
       });
     } catch (err) {
       throw new RpcException({

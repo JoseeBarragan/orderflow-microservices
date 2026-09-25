@@ -41,23 +41,19 @@ describe("ReserveStockService", () => {
   };
 
   describe("execute", () => {
-    it("reserva el stock y emite stock.reserve cuando todos los productos existen y hay stock", async () => {
+    it("reserva el stock sin tocar el outbox cuando todos los productos existen y hay stock", async () => {
       inventoryRepository.findByIds.mockResolvedValue([
         { id: "p1", name: "A" },
         { id: "p2", name: "B" },
       ]);
       inventoryRepository.reserveStock.mockResolvedValue({ success: true });
 
-      await service.execute(order);
+      const result = await service.execute(order);
 
+      expect(result).toBeUndefined();
       expect(inventoryRepository.findByIds).toHaveBeenCalledWith(["p1", "p2"]);
       expect(inventoryRepository.reserveStock).toHaveBeenCalledWith(order);
-      expect(outboxRepository.save).toHaveBeenCalledWith("stock.reserve", {
-        orderId: order.orderId,
-        items: order.items,
-        totalAmount: order.totalAmount,
-      });
-      expect(outboxRepository.save).toHaveBeenCalledTimes(1);
+      expect(outboxRepository.save).not.toHaveBeenCalled();
     });
 
     it("emite stock.reject con reason PRODUCT_NOT_FOUND cuando faltan productos", async () => {

@@ -1,7 +1,5 @@
 {
   "compilerOptions": {
-    "assets": ["**/*.proto"],
-    "watchAssets": true,
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "resolvePackageJsonExports": true,

@@ -6,18 +6,31 @@ import { firstValueFrom } from "rxjs";
 
 @Injectable()
 export class OutboxPublisher implements OnModuleInit {
+  private timer: NodeJS.Timeout | null = null;
+  private running = false;
+
   constructor(
     private readonly outboxRepository: OutboxRepository,
     @Inject("RMQ_CLIENT") private readonly client: ClientProxy,
   ) {}
 
   onModuleInit() {
-    setInterval(() => {
+    this.timer = setInterval(() => {
       void this.publishPending();
     }, 1000);
   }
 
+  onModuleDestroy() {
+    if (this.timer) {
+      clearInterval(this.timer);
+      this.timer = null;
+    }
+  }
+
   private async publishPending(): Promise<void> {
+    if (this.running) return;
+    this.running = true;
+
     const messages = await this.outboxRepository.getPendingMessage();
 
     if (messages.length === 0) return;
@@ -32,6 +45,8 @@ export class OutboxPublisher implements OnModuleInit {
         await this.outboxRepository.updateMessagePublish(msg.id, true);
       } catch (err) {
         console.error(`Error publicando mensaje ${msg.id}: ${err}`);
+      } finally {
+        this.running = false;
       }
     }
   }

@@ -34,4 +34,6 @@ model stock_reservations {
   released   Boolean  @default(false)
   created_at DateTime @default(now()) @db.Timestamptz(6)
   products   products @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  
+  @@unique([order_id, product_id])
 }

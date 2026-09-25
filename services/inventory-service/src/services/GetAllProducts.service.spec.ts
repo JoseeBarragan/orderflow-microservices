@@ -1,6 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { GetAllProductsService } from "./GetAllProducts.service";
 import { InventoryRepository } from "../Repository/Inventory.repository";
+import type { GetAllReturnType } from "../types/Inventory.types";
 
 describe("GetAllProductsService", () => {
   let service: GetAllProductsService;
@@ -25,16 +26,11 @@ describe("GetAllProductsService", () => {
 
   describe("getProducts", () => {
     it("delega al repositorio con los límites indicados", async () => {
-      const products = [
-        {
-          id: "1",
-          name: "Test",
-          available_stock: 10,
-          reserved_stock: 0,
-          created_at: new Date(),
-          updated_at: new Date(),
-        },
-      ];
+      const products: GetAllReturnType = {
+        items: [
+          { id: "1", name: "Test", unitPriceCents: 150000, availableStock: 10 },
+        ],
+      };
       productsRepository.findAll.mockResolvedValue(products);
 
       const result = await service.getProducts(10, 20);

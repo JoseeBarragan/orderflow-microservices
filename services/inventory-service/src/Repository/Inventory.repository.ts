@@ -30,7 +30,7 @@ export class InventoryRepository {
       this.logger.error(`Error al buscar productos: ${err}`);
       throw new RpcException({
         code: status.INTERNAL,
-        message: `Error en el servsdor, ${err}`,
+        message: `Error en el servidor, ${err}`,
       });
     }
   }
@@ -50,8 +50,22 @@ export class InventoryRepository {
     order: NewOrder,
   ): Promise<{ success: true } | { success: false; reason: string }> {
     try {
+      const items = [...order.items].sort((a, b) =>
+        a.productId.localeCompare(b.productId),
+      );
       await this.prisma.$transaction(async (tx) => {
-        for (const item of order.items) {
+        const existing = await tx.stock_reservations.findMany({
+          where: { order_id: order.orderId },
+        });
+
+        if (existing.length > 0) return;
+
+        for (const item of items) {
+          if (!Number.isInteger(item.quantity) || item.quantity <= 0)
+            throw new Error(
+              `Error a la hora de verificar la cantidad ingresada del producto: ${item.productId}`,
+            );
+
           const result = await tx.products.updateMany({
             where: {
               id: item.productId,
@@ -111,17 +125,22 @@ export class InventoryRepository {
         }
 
         for (const reservation of reservations) {
+          const claimed = await tx.stock_reservations.updateMany({
+            where: { id: reservation.id, released: false },
+            data: { released: true },
+          });
+
+          if (claimed.count === 0) {
+            this.logger.warn(`Reserva ${reservation.id} ya liberada, se omite`);
+            continue;
+          }
+
           await tx.products.update({
-            where: { id: reservation.product_id },
+            where: { id: reservation.product_id, available_stock: { gte: 0 } },
             data: {
               available_stock: { increment: reservation.quantity },
               reserved_stock: { decrement: reservation.quantity },
             },
-          });
-
-          await tx.stock_reservations.update({
-            where: { id: reservation.id },
-            data: { released: true },
           });
         }
       });
@@ -129,7 +148,7 @@ export class InventoryRepository {
       this.logger.error(`Error al buscar productos: ${err}`);
       throw new RpcException({
         code: status.INTERNAL,
-        message: `Error en el servsdor, ${err}`,
+        message: `Error en el servidor, ${err}`,
       });
     }
   }

@@ -1,5 +1,5 @@
 import { Test, TestingModule } from "@nestjs/testing";
-import { InternalServerErrorException, Logger } from "@nestjs/common";
+import { Logger } from "@nestjs/common";
 import { OutboxRepository } from "./Outbox.repository";
 import { PrismaService } from "../prisma.service";
 import {
@@ -78,8 +78,12 @@ describe("OutboxRepository", () => {
       });
     });
 
-    it("lanza InternalServerErrorException cuando prisma falla y loguea el error", async () => {
-      outbox_events.create.mockRejectedValue(new Error("db down"));
+    it("rellanza el error y loguea cuando prisma falla", async () => {
+      const error = new Error("db down");
+      outbox_events.create.mockRejectedValue(error);
+      const errorSpy = jest
+        .spyOn(Logger.prototype, "error")
+        .mockImplementation(() => undefined);
 
       await expect(
         repository.save("stock.reserve", {
@@ -87,7 +91,10 @@ describe("OutboxRepository", () => {
           items: [],
           totalAmount: 0,
         }),
-      ).rejects.toThrow(InternalServerErrorException);
+      ).rejects.toThrow(error);
+      expect(errorSpy).toHaveBeenCalled();
+
+      errorSpy.mockRestore();
     });
 
     it("acepta ambos eventType definidos por el tipo OutboxEventType", async () => {
@@ -136,12 +143,11 @@ describe("OutboxRepository", () => {
       });
     });
 
-    it("lanza InternalServerErrorException cuando prisma falla", async () => {
-      outbox_events.findMany.mockRejectedValue(new Error("db down"));
+    it("rellanza el error cuando prisma falla", async () => {
+      const error = new Error("db down");
+      outbox_events.findMany.mockRejectedValue(error);
 
-      await expect(repository.getPendingMessage()).rejects.toThrow(
-        InternalServerErrorException,
-      );
+      await expect(repository.getPendingMessage()).rejects.toThrow(error);
     });
   });
 
@@ -171,11 +177,12 @@ describe("OutboxRepository", () => {
       );
     });
 
-    it("lanza InternalServerErrorException cuando prisma falla", async () => {
-      outbox_events.update.mockRejectedValue(new Error("db down"));
+    it("rellanza el error cuando prisma falla", async () => {
+      const error = new Error("db down");
+      outbox_events.update.mockRejectedValue(error);
 
       await expect(repository.updateMessagePublish("m1", true)).rejects.toThrow(
-        InternalServerErrorException,
+        error,
       );
     });
   });

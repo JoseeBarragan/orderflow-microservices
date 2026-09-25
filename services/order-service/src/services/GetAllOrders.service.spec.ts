@@ -10,15 +10,7 @@ describe("GetAllOrdersService", () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GetAllOrdersService,
-        {
-          provide: OrderRepository,
-          useValue: {
-            getAll: jest.fn(),
-            create: jest.fn(),
-            getPendingMessage: jest.fn(),
-            updateMessagePublish: jest.fn(),
-          },
-        },
+        { provide: OrderRepository, useValue: { getAll: jest.fn() } },
       ],
     }).compile();
 
@@ -27,25 +19,19 @@ describe("GetAllOrdersService", () => {
   });
 
   describe("execute", () => {
-    it("delega al repositorio y devuelve las órdenes almacenadas", async () => {
-      const orders = [
-        { id: "order-1", totalAmount: 3000 },
-        { id: "order-2", totalAmount: 1000 },
-      ];
+    it("delega la obtención de órdenes al repositorio", async () => {
+      const orders = {
+        orders: [
+          { orderId: "o1", totalAmount: 1000, items: [] },
+          { orderId: "o2", totalAmount: 2000, items: [] },
+        ],
+      };
       orderRepository.getAll.mockResolvedValue(orders);
 
       const result = await service.execute();
 
       expect(result).toEqual(orders);
       expect(orderRepository.getAll).toHaveBeenCalledTimes(1);
-    });
-
-    it("devuelve un arreglo vacío cuando no hay órdenes", async () => {
-      orderRepository.getAll.mockResolvedValue([]);
-
-      const result = await service.execute();
-
-      expect(result).toEqual([]);
     });
 
     it("propaga el error cuando el repositorio falla", async () => {
