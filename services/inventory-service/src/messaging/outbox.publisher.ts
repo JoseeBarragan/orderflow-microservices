@@ -41,6 +41,7 @@ export class OutboxPublisher implements OnModuleInit, OnModuleDestroy {
         continue;
       }
       try {
+        console.log(msg.event_type, msg.payload);
         await firstValueFrom(this.client.emit(msg.event_type, msg.payload));
         await this.outboxRepository.updateMessagePublish(msg.id, true);
       } catch (err) {

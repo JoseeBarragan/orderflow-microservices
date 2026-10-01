@@ -22,7 +22,7 @@ import { OrderGrpcController } from "./order.grpc.controller";
         name: "RMQ_CLIENT",
         transport: Transport.RMQ,
         options: {
-          urls: ["amqp://localhost:5672"],
+          urls: [process.env.RABBITMQ_URL || "amqp://localhost:5672"],
           exchange: "orderflow.events",
           exchangeType: "topic",
           queue: "order-service.publisher.queue",

@@ -1,6 +1,7 @@
 import {
   Inject,
   Injectable,
+  Logger,
   OnModuleDestroy,
   OnModuleInit,
 } from "@nestjs/common";
@@ -11,6 +12,7 @@ import { firstValueFrom } from "rxjs";
 
 @Injectable()
 export class OutboxPublisher implements OnModuleInit, OnModuleDestroy {
+  private logger = new Logger();
   private timer: ReturnType<typeof setInterval>;
 
   constructor(
@@ -45,7 +47,8 @@ export class OutboxPublisher implements OnModuleInit, OnModuleDestroy {
         await firstValueFrom(this.client.emit(msg.eventType, msg.payload));
         await this.outboxRepository.updateMessagePublish(msg.id, true);
       } catch (err) {
-        console.error(`Error publicando mensaje ${msg.id}: ${err}`);
+        console.log("raw", err);
+        this.logger.error(`Error publicando mensaje ${msg.id}`, err);
       }
     }
   }
